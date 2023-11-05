@@ -1,0 +1,34 @@
+import GUI.MainFrame;
+
+import java.io.IOException;
+
+public class Main {
+    private static MainFrame mf;
+
+    public static void main(String[] args) {
+
+        mf = MainFrame.getInstance();
+        mf.createGUI();
+
+        startServerConnection();
+    }
+    public static void startServerConnection() {
+        try {
+            // KILL if its running
+            if (toServer != null)
+                toServer.kill();
+
+            toServer = new ConnectionThread(User.getInstance().edge);
+            // mf.bridgePanel.connectCon1();
+            toServer.start();
+
+            //GRAFICAL UPDATER
+            graphicsUpdate = new DynamicUpdate(mf, toServer);
+            graphicsUpdate.start();
+
+
+        } catch (IOException uhe) {
+            mf.serverErrorDialog();
+        }
+    }
+}

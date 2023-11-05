@@ -1,0 +1,67 @@
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public static void main(String[] args) {
+        int localPort = 12345; // Port to host the local TCP server
+        String remoteHost = "localhost"; // Remote server hostname or IP
+        int remotePort = 8080; // Remote server port
+
+        try {
+            // Create a local TCP server
+            ServerSocket serverSocket = new ServerSocket(localPort);
+            System.out.println("Local TCP server started on port " + localPort);
+
+            while (true) {
+                // Accept incoming client connections
+                Socket clientSocket = serverSocket.accept();
+                System.out.println("Client connected: " + clientSocket.getInetAddress().getHostAddress());
+
+                // Connect to the remote server
+                Socket remoteSocket = new Socket(remoteHost, remotePort);
+                System.out.println("Connected to remote server: " + remoteHost + ":" + remotePort);
+
+                // Create input and output streams for client and remote connections
+                InputStream clientInput = clientSocket.getInputStream();
+                OutputStream clientOutput = clientSocket.getOutputStream();
+                InputStream remoteInput = remoteSocket.getInputStream();
+                OutputStream remoteOutput = remoteSocket.getOutputStream();
+
+                // Start a thread to forward data from client to remote server
+               Thread clientToRemoteThread = new Thread(() -> {
+                                   try {
+                                       int bytesRead;
+                                       byte[] buffer = new byte[1024];
+                                       while ((bytesRead = clientInput.read(buffer)) != -1) {
+                                           // Create a custom header and attach the message
+                                           String header = "CustomHeader: ";
+                                           String message = new String(buffer, 0, bytesRead);
+                                           String combinedMessage = header + message;
+
+                                           remoteOutput.write(combinedMessage.getBytes());
+                                       }
+                                   } catch (IOException e) {
+                                       e.printStackTrace();
+                                   }
+                               });
+
+                // Start a thread to forward data from remote server to client
+                Thread remoteToClientThread = new Thread(() -> {
+                    try {
+                        int bytesRead;
+                        byte[] buffer = new byte[1024];
+                        while ((bytesRead = remoteInput.read(buffer)) != -1) {
+                            clientOutput.write(buffer, 0, bytesRead);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+                clientToRemoteThread.start();
+                remoteToClientThread.start();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
