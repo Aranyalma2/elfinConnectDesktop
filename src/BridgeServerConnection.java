@@ -20,7 +20,7 @@ public class BridgeServerConnection {
     private Thread clientToRemoteThread = null;
 
     private Thread remoteToClientThread = null;
-    private Thread hearthbeatThread = null;
+    private Thread heartbeatThread = null;
 
     private Thread localConnectionHandlerThread = null;
 
@@ -31,53 +31,48 @@ public class BridgeServerConnection {
     //Connection fabrication message
     String connect = "";
 
-    public void stopAll(){
-
-    }
 
     public void stopBridge(){
-        clientToRemoteThread.interrupt();
-        remoteToClientThread.interrupt();
-        hearthbeatThread.interrupt();
-        localConnectionHandlerThread.interrupt();
-    }
-    public void startBridge(){
-        hearthbeatThread.start();
-        clientToRemoteThread.start();
-        remoteToClientThread.start();
-    }
 
-    public void createBridgeThreads() throws IllegalThreadStateException{
+        stopConnection();
 
-        //STOP Thread, if somehow running
+        if (localConnectionHandlerThread != null && localConnectionHandlerThread.getState() == Thread.State.RUNNABLE) {
+            localConnectionHandlerThread.interrupt();
+        }
+    }
+    private void stopConnection(){
         if (clientToRemoteThread != null && clientToRemoteThread.getState() == Thread.State.RUNNABLE) {
             clientToRemoteThread.interrupt();
         }
         if (remoteToClientThread != null && remoteToClientThread.getState() == Thread.State.RUNNABLE) {
             remoteToClientThread.interrupt();
         }
-        if (hearthbeatThread != null && hearthbeatThread.getState() == Thread.State.RUNNABLE) {
-            hearthbeatThread.interrupt();
+        if (heartbeatThread != null && heartbeatThread.getState() == Thread.State.RUNNABLE) {
+            heartbeatThread.interrupt();
+        }
+    }
+    private void startBridge(){
+        clientToRemoteThread.start();
+        remoteToClientThread.start();
+    }
+
+    private void createHeartbeatThread() throws IllegalThreadStateException{
+
+        //STOP Thread, if somehow running
+        if (heartbeatThread != null && heartbeatThread.getState() == Thread.State.RUNNABLE) {
+            heartbeatThread.interrupt();
         }
 
-        // Create input and output streams for client and remote connections
         try {
-            InputStream clientInput = clientSocket.getInputStream();
-            OutputStream clientOutput = clientSocket.getOutputStream();
-            InputStream remoteInput = bridgeSocket.getInputStream();
-            OutputStream remoteOutput = bridgeSocket.getOutputStream();
             OutputStream remoteHBOutput = bridgeHBSocket.getOutputStream();
 
             //Start the socket heartbeat thread
-            hearthbeatThread = new Thread(() -> {
+            heartbeatThread = new Thread(() -> {
                 try {
-                    remoteHBOutput.write(beat.getBytes());
-                    Thread.sleep(100);
-                    remoteHBOutput.write(connect.getBytes());
                     while (!Thread.interrupted()) {
-                            remoteHBOutput.write(beat.getBytes());
-                            //30SEC heartbeat msg
-                            Thread.sleep(30000);
+                        remoteHBOutput.write(beat.getBytes());
+                        //30SEC heartbeat msg
+                        Thread.sleep(30000);
                     }
                 } catch (IOException e) {
                     stopBridge();
@@ -87,6 +82,30 @@ public class BridgeServerConnection {
                     return;
                 }
             });
+        }catch(IOException e){
+            e.printStackTrace();
+            stopConnection();
+        }
+    }
+
+    private void createBridgeThreads() throws IllegalThreadStateException{
+
+        //STOP Thread, if somehow running
+        if (clientToRemoteThread != null && clientToRemoteThread.getState() == Thread.State.RUNNABLE) {
+            clientToRemoteThread.interrupt();
+        }
+        if (remoteToClientThread != null && remoteToClientThread.getState() == Thread.State.RUNNABLE) {
+            remoteToClientThread.interrupt();
+        }
+
+
+        // Create input and output streams for client and remote connections
+        try {
+            InputStream clientInput = clientSocket.getInputStream();
+            OutputStream clientOutput = clientSocket.getOutputStream();
+            InputStream remoteInput = bridgeSocket.getInputStream();
+            OutputStream remoteOutput = bridgeSocket.getOutputStream();
+
 
             // Start a thread to forward data from client to remote server
             clientToRemoteThread = new Thread(() -> {
@@ -102,7 +121,7 @@ public class BridgeServerConnection {
                         remoteOutput.write(combinedMessage.getBytes());
                     }
                 } catch (IOException e) {
-                    stopBridge();
+                    stopConnection();
                     throw new IllegalThreadStateException("Remote client->server connection error");
                 }
             });
@@ -116,7 +135,7 @@ public class BridgeServerConnection {
                         clientOutput.write(buffer, 0, bytesRead);
                     }
                 } catch (IOException e) {
-                    stopBridge();
+                    stopConnection();
                     throw new IllegalThreadStateException("Remote server->client connection error");
                 }
             });
@@ -124,21 +143,30 @@ public class BridgeServerConnection {
 
         }catch(IOException e){
             e.printStackTrace();
-            stopBridge();
+            stopConnection();
         }
     }
 
-    public void createSockets(int localServerPort, String remoteHost, int remotePort, String uuid, String virtualName, String endDeviceMAC) throws IOException, IllegalThreadStateException {
+    public void initBridge(String remoteHost, int remotePort, String uuid, String virtualName, String endDeviceMAC) throws IOException, IllegalThreadStateException{
 
         beat = "beat;"+uuid+";"+virtualName+";"+virtualName+";1";
         header = "data;"+uuid+";"+virtualName+";";
         connect = "conn;"+uuid+";"+virtualName+";"+endDeviceMAC;
 
-        bridgeSocket = new Socket(remoteHost, remotePort);
+
         bridgeHBSocket = new Socket(remoteHost, remotePort);
+        createHeartbeatThread();
+        heartbeatThread.start();
+    }
+
+    public void buildConnection() throws IOException {
+        bridgeHBSocket.getOutputStream().write(connect.getBytes());
+    }
+    public void createBridge(int localServerPort, String remoteHost, int remotePort) throws IOException, IllegalThreadStateException {
+
+        bridgeSocket = new Socket(remoteHost, remotePort);
 
         localServer = new ServerSocket(localServerPort);
-
 
         localConnectionHandlerThread = new Thread(() -> {
             while(!Thread.currentThread().isInterrupted()){
@@ -154,5 +182,6 @@ public class BridgeServerConnection {
             }
         });
         localConnectionHandlerThread.start();
+
     }
 }

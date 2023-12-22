@@ -13,8 +13,13 @@ public class Main {
 
         BridgeServerConnection bs = new BridgeServerConnection();
         try {
-            bs.createSockets(localPort,remoteHost,remotePort,"almafaa","Terminal-Test","98D863CC68B1");
+            bs.initBridge(remoteHost,remotePort,"965b963fa1b585df","Terminal-Test","98D863584D0E");
+            Thread.sleep(10000);
+            bs.buildConnection();
+            bs.createBridge(localPort,remoteHost,remotePort);
         } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
 
