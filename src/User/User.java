@@ -2,12 +2,13 @@ package User;
 
 import GUI.MainFrame;
 
-import javax.swing.*;
+import Device.Device;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 
 public class User {
     private transient static User singelton;
@@ -18,6 +19,8 @@ public class User {
     public static String remoteServerIp;
 
     public static int remoteServerPort;
+
+    private transient ArrayList<Device> DeviceList;
 
     // Constructor
     private User() {
@@ -38,6 +41,36 @@ public class User {
             loadUser();
         }
         return singelton;
+    }
+
+    // Get UUID
+    public static String getUUID() {
+        return uuid;
+    }
+
+    public static String getAddress() {
+        return remoteServerIp + ":" + Integer.toString(remoteServerPort);
+    }
+
+    // Get DeviceList
+    public ArrayList<Device> getDevices() {
+        return DeviceList;
+    }
+
+    // Get Device by MAC
+    public Device getDeviceByMAC(String macAddr) {
+        for (Device i : DeviceList) {
+            if (i.getMac().equals(macAddr)) {
+                return i;
+            }
+        }
+        return null;
+    }
+
+    // Overwrite DeviceList to a newer one
+    synchronized public void updateDeviceList(ArrayList<Device> newList) {
+        DeviceList = newList;
+        notifyAll();
     }
 
     // Update User uuid and server address
@@ -95,14 +128,4 @@ public class User {
             out.close();
             file.close();
     }
-
-    // Get UUID
-    public static String getUUID() {
-        return uuid;
-    }
-
-    public static String getAddress() {
-        return remoteServerIp + ":" + Integer.toString(remoteServerPort);
-    }
-
 }
