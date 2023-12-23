@@ -1,4 +1,6 @@
 import GUI.MainFrame;
+import User.User;
+
 import java.io.*;
 import java.net.*;
 import java.io.IOException;
@@ -6,6 +8,16 @@ import java.util.Enumeration;
 
 public class Main {
     public static void main(String[] args) {
+
+        User user = User.getInstance();
+
+        MainFrame main = MainFrame.getInstance();
+        main.createGUI();
+
+
+
+
+
         int localPort = 12345; // Port to host the local TCP server
         String remoteHost = "localhost"; // Remote server hostname or IP
         int remotePort = 8080; // Remote server port
