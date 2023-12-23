@@ -22,6 +22,8 @@ public class MainFrame extends WindowAdapter {
 
     public JPanel userPanel;
 
+    public JPanel serverPanel;
+
     public JFrame frame;
 
     private MainFrame() {
@@ -37,12 +39,15 @@ public class MainFrame extends WindowAdapter {
 
 
     // paint user
-    private void paintUser(Container north) {
+    private void paintUserAndStatus(Container north) {
         JPanel northPanel = new JPanel();
         northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.LINE_AXIS));
 
         userPanel = new UserPanel();
         northPanel.add(userPanel);
+
+        serverPanel = new ServerConnectionStatusPanel();
+        northPanel.add(serverPanel);
 
         north.add(northPanel, BorderLayout.NORTH);
     }
@@ -57,7 +62,7 @@ public class MainFrame extends WindowAdapter {
     private void paintElementsToFrame(JFrame frame) {
 
         frame.setLayout(new BorderLayout());
-        paintUser(frame.getContentPane());
+        paintUserAndStatus(frame.getContentPane());
 
     }
 

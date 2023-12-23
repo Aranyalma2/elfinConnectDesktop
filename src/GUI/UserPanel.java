@@ -44,7 +44,7 @@ public class UserPanel extends JPanel {
         //BORDER jPanel
         this.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black), "User and Server"));
 
-        this.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        this.setLayout(new FlowLayout(FlowLayout.LEFT));
     }
 
     private class ApplyButton implements ActionListener {
@@ -59,7 +59,7 @@ public class UserPanel extends JPanel {
                 //INVALID SERVER ADDRESS INPUT
                 addressErrorDialog(ie.getMessage());
             } catch (IOException ex) {
-                throw new RuntimeException(ex);
+                saveUserErrorDialog(ex.getMessage());
             }
         }
     }
