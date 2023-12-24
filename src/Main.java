@@ -1,15 +1,23 @@
+import Device.Device;
 import GUI.MainFrame;
 import User.User;
 
 import java.io.*;
 import java.net.*;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 
 public class Main {
     public static void main(String[] args) {
 
         User user = User.getInstance();
+
+        ArrayList<Device> d = new ArrayList<Device>();
+        Device d1 = new Device("host", "mac", "date", true);
+        d.add(d1);
+
+        user.updateDeviceList(d);
 
         MainFrame main = MainFrame.getInstance();
         main.createGUI();

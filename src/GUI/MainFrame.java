@@ -7,14 +7,11 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 
-import javax.swing.BoxLayout;
+import javax.swing.*;
+import javax.swing.table.TableColumn;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 
 
 public class MainFrame extends WindowAdapter {
@@ -52,6 +49,25 @@ public class MainFrame extends WindowAdapter {
         north.add(northPanel, BorderLayout.NORTH);
     }
 
+    // paint table
+    private void paintTable(Container south) {
+        JTable jTable = new JTable(new DevicePanel());
+        // size
+        jTable.getColumnModel().getColumn(0).setMinWidth(25);
+        jTable.getColumnModel().getColumn(1).setMinWidth(150);
+        jTable.getColumnModel().getColumn(2).setMinWidth(150);
+        jTable.getColumnModel().getColumn(3).setMinWidth(150);
+        jTable.getColumnModel().getColumn(4).setMinWidth(75);
+        // color
+        TableColumn col = jTable.getColumnModel().getColumn(4);
+        col.setCellRenderer(new tableColorRenderer(Color.green, Color.red));
+
+        jTable.setFillsViewportHeight(true);
+        jTable.setAutoCreateRowSorter(true);
+
+        south.add(new JScrollPane(jTable), BorderLayout.SOUTH);
+    }
+
     private void setupFrame(JFrame frame) {
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.addWindowListener(this);
@@ -63,6 +79,7 @@ public class MainFrame extends WindowAdapter {
 
         frame.setLayout(new BorderLayout());
         paintUserAndStatus(frame.getContentPane());
+        paintTable(frame.getContentPane());
 
     }
 

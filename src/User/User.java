@@ -20,7 +20,7 @@ public class User {
 
     public static int remoteServerPort;
 
-    private transient ArrayList<Device> DeviceList;
+    private transient ArrayList<Device> DeviceList = new ArrayList<>();
 
     // Constructor
     private User() {
