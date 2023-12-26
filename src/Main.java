@@ -2,11 +2,8 @@ import Device.Device;
 import GUI.MainFrame;
 import User.User;
 
-import java.io.*;
-import java.net.*;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 
 public class Main {
     public static void main(String[] args) {
@@ -15,21 +12,18 @@ public class Main {
 
         ArrayList<Device> d = new ArrayList<Device>();
         Device d1 = new Device("host", "mac", "date", true);
+        Device d2 = new Device("host2", "mac2", "date2", false);
         d.add(d1);
+        d.add(d2);
 
         user.updateDeviceList(d);
 
         MainFrame main = MainFrame.getInstance();
         main.createGUI();
 
-
-
-
-
         int localPort = 12345; // Port to host the local TCP server
         String remoteHost = "localhost"; // Remote server hostname or IP
         int remotePort = 8080; // Remote server port
-
 
         BridgeServerConnection bs = new BridgeServerConnection();
         try {

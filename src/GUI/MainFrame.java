@@ -2,12 +2,12 @@ package GUI;
 
 import User.User;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.Dimension;
+import java.awt.*;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import java.awt.event.WindowAdapter;
@@ -17,9 +17,9 @@ import java.awt.event.WindowEvent;
 public class MainFrame extends WindowAdapter {
     private static MainFrame singelton = null;
 
-    public JPanel userPanel;
+    public UserPanel userPanel;
 
-    public JPanel serverPanel;
+    public ServerConnectionStatusPanel serverPanel;
 
     public JFrame frame;
 
@@ -44,6 +44,7 @@ public class MainFrame extends WindowAdapter {
         northPanel.add(userPanel);
 
         serverPanel = new ServerConnectionStatusPanel();
+
         northPanel.add(serverPanel);
 
         north.add(northPanel, BorderLayout.NORTH);
@@ -51,20 +52,37 @@ public class MainFrame extends WindowAdapter {
 
     // paint table
     private void paintTable(Container south) {
+        JLabel tableHeader = new JLabel("Devices");
+
+        tableHeader.setFont(new Font("Ariel", Font.BOLD, 20));
+
+        JPanel bridgeBtns = new JPanel();
+        JButton openConnectionButton = new JButton("Open connection");
+        JButton closeConnectionButton = new JButton("Close connection");
+        bridgeBtns.add(openConnectionButton);
+        bridgeBtns.add(closeConnectionButton);
+        bridgeBtns.setLayout(new FlowLayout(FlowLayout.LEFT));
+
         JTable jTable = new JTable(new DevicePanel());
         // size
-        jTable.getColumnModel().getColumn(0).setMinWidth(25);
+        jTable.getColumnModel().getColumn(0).setPreferredWidth(10);
         jTable.getColumnModel().getColumn(1).setMinWidth(150);
         jTable.getColumnModel().getColumn(2).setMinWidth(150);
         jTable.getColumnModel().getColumn(3).setMinWidth(150);
         jTable.getColumnModel().getColumn(4).setMinWidth(75);
+        jTable.getColumnModel().getColumn(5).setMinWidth(75);
         // color
-        TableColumn col = jTable.getColumnModel().getColumn(4);
-        col.setCellRenderer(new tableColorRenderer(Color.green, Color.red));
+        jTable.getColumnModel().getColumn(0).setCellRenderer(new TableCenterRenderer());
+        jTable.getColumnModel().getColumn(1).setCellRenderer(new TableCenterRenderer());
+        jTable.getColumnModel().getColumn(2).setCellRenderer(new TableCenterRenderer());
+        jTable.getColumnModel().getColumn(3).setCellRenderer(new TableCenterRenderer());
+        jTable.getColumnModel().getColumn(4).setCellRenderer(new TableColorRenderer(Color.green, Color.red));
+
 
         jTable.setFillsViewportHeight(true);
         jTable.setAutoCreateRowSorter(true);
-
+        south.add(tableHeader, BorderLayout.CENTER);
+        south.add(bridgeBtns,BorderLayout.CENTER);
         south.add(new JScrollPane(jTable), BorderLayout.SOUTH);
     }
 

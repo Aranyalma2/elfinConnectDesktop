@@ -12,6 +12,7 @@ public class ServerConnectionStatusPanel extends JPanel {
 
         // Create and add components
         statusLabel = new JLabel("Not connected");
+        statusLabel.setFont(new Font("Ariel", Font.BOLD, 20));
         statusLabel.setForeground(Color.RED);
 
         this.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black), "Server connection status"));

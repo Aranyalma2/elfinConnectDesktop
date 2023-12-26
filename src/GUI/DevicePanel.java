@@ -4,14 +4,21 @@ import Device.Device;
 import User.User;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
-public class DevicePanel extends AbstractTableModel {
-
+public class DevicePanel extends AbstractTableModel{
     ArrayList<Device> devices = User.getInstance().getDevices();
+    ArrayList<String> ports;
 
     @Override
     public int getRowCount() {
@@ -20,19 +27,28 @@ public class DevicePanel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 5;
+        return 6;
     }
 
     @Override
     public Object getValueAt(int r, int c) {
         Device dev = devices.get(r);
-        return switch (c) {
-            case 0 -> r + 1;
-            case 1 -> dev.getHostName();
-            case 2 -> dev.getMac();
-            case 3 -> dev.getSeen();
-            default -> dev.getStatus() ? "Online" : "Offline";
-        };
+        switch (c) {
+            case 0:
+                return r + 1;
+            case 1:
+                return dev.getHostName();
+            case 2:
+                return dev.getMac();
+            case 3:
+                return dev.getSeen();
+            case 4:
+                return dev.getStatus() ? "Online" : "Offline";
+            case 5:
+                return "none";
+            default:
+                return "none";
+        }
     }
 
     @Override
@@ -42,7 +58,9 @@ public class DevicePanel extends AbstractTableModel {
             case 1 -> "Hostname";
             case 2 -> "MAC";
             case 3 -> "Last seen";
-            default -> "Status";
+            case 4 -> "Status";
+            case 5 -> "Running port";
+            default -> "None";
         };
     }
 
@@ -53,21 +71,6 @@ public class DevicePanel extends AbstractTableModel {
         return String.class;
     }
 
-    /*
-     * @Override public void setValueAt(Object obj, int r, int c) { elfinIoT iot =
-     * iots.get(r); if(c>=2 && c<=3) { switch(c) { case 2:
-     * student.setSignature((Boolean)obj); break; default:
-     * student.setGrade((Integer)obj); break; } students.set(r, student);
-     * this.fireTableRowsUpdated(r, r); } }
-     */
-    @Override
-    public boolean isCellEditable(int r, int c) {
-        /*
-         * if(c < getColumnCount() && c >= 2) { return true; }
-         */
-        return false;
-    }
-
     public void updateTable() {
         devices = User.getInstance().getDevices();
         fireTableDataChanged();
@@ -75,13 +78,14 @@ public class DevicePanel extends AbstractTableModel {
 }
 
 // -----------COLOR RENDERER CLASS-----------
-class tableColorRenderer extends DefaultTableCellRenderer {
+class TableColorRenderer extends DefaultTableCellRenderer {
     Color color1, color2;
 
-    public tableColorRenderer(Color color1, Color color2) {
+    public TableColorRenderer(Color color1, Color color2) {
         super();
         this.color1 = color1;
         this.color2 = color2;
+        this.setHorizontalAlignment(SwingConstants.CENTER);
     }
 
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
@@ -94,3 +98,13 @@ class tableColorRenderer extends DefaultTableCellRenderer {
         return cell;
     }
 }
+
+class TableCenterRenderer extends DefaultTableCellRenderer {
+
+    public TableCenterRenderer() {
+        super();
+        this.setHorizontalAlignment(SwingConstants.CENTER);
+    }
+}
+
+
