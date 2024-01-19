@@ -1,14 +1,11 @@
 package GUI;
 
 import User.User;
+import Bridge.BridgeCreator;
 
 import java.awt.*;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -64,6 +61,8 @@ public class MainFrame extends WindowAdapter {
         bridgeBtns.setLayout(new FlowLayout(FlowLayout.LEFT));
 
         JTable jTable = new JTable(new DevicePanel());
+        BridgeCreator bc = new BridgeCreator(jTable, openConnectionButton, closeConnectionButton);
+
         // size
         jTable.getColumnModel().getColumn(0).setPreferredWidth(10);
         jTable.getColumnModel().getColumn(1).setMinWidth(150);

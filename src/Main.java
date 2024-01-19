@@ -13,8 +13,10 @@ public class Main {
         ArrayList<Device> d = new ArrayList<Device>();
         Device d1 = new Device("host", "mac", "date", true);
         Device d2 = new Device("host2", "mac2", "date2", false);
+        Device d3 = new Device("host3", "mac3", "date3", false);
         d.add(d1);
         d.add(d2);
+        d.add(d3);
 
         user.updateDeviceList(d);
 
