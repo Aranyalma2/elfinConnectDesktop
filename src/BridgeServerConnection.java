@@ -151,7 +151,7 @@ public class BridgeServerConnection {
 
         beat = "beat;"+uuid+";"+virtualName+";"+virtualName+";1";
         header = "data;"+uuid+";"+virtualName+";";
-        connect = "conn;"+uuid+";"+virtualName+";"+endDeviceMAC;
+        connect = "connme;"+uuid+";"+virtualName+";"+endDeviceMAC;
 
 
         bridgeHBSocket = new Socket(remoteHost, remotePort);
