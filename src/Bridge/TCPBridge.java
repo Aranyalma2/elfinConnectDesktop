@@ -7,13 +7,13 @@ import java.net.Socket;
 import java.net.ServerSocket;
 
 public class TCPBridge {
-    private int localPort = 0;
-
     private ServerSocket localServer = null;
 
     private Socket clientSocket = null;
 
     private Socket remoteSocket = null;
+
+    private Thread localConnectionHandlerThread = null;
 
     private Thread clientToRemoteThread = null;
 
@@ -24,10 +24,45 @@ public class TCPBridge {
     //Connection fabrication message
     String connect = "";
 
-    public TCPBridge(String remoteHost, int remotePort, String uuid, String virtualName, String endDeviceMAC){
-        header = "data;"+uuid+";"+virtualName+";";
-        connect = "connme;"+uuid+";"+virtualName+";"+endDeviceMAC;
+    public TCPBridge(int localServerPort, String remoteHost, int remotePort, String uuid, String endDeviceMAC) throws IllegalThreadStateException {
+        header = "data;"+uuid+";"+endDeviceMAC+";";
+        connect = "connme;"+uuid+";"+endDeviceMAC;
 
+        try {
+
+            localServer = new ServerSocket(localServerPort);
+
+            remoteSocket = new Socket(remoteHost, remotePort);
+            remoteSocket.getOutputStream().write(connect.getBytes());
+
+        }catch(IOException e){
+            throw new IllegalThreadStateException("Local connection error");
+        }
+
+        localConnectionHandlerThread = new Thread(() -> {
+            while(!Thread.currentThread().isInterrupted()){
+                try {
+                    clientSocket = localServer.accept();
+                    createConnectionThreads();
+
+                } catch (IOException e) {
+                    stopConnection();
+                    throw new IllegalThreadStateException("Local connection error");
+                }
+            }
+            stopConnection();
+        });
+        localConnectionHandlerThread.start();
+
+    }
+
+    public void stopBridge(){
+        localConnectionHandlerThread.interrupt();
+    }
+
+    private void startConnection(){
+        clientToRemoteThread.start();
+        remoteToClientThread.start();
     }
 
     private void stopConnection(){
@@ -39,16 +74,11 @@ public class TCPBridge {
         }
     }
 
-    private void createBridgeThreads() throws IllegalThreadStateException{
+
+    private void createConnectionThreads() throws IllegalThreadStateException{
 
         //STOP Thread, if somehow running
-        if (clientToRemoteThread != null && clientToRemoteThread.getState() == Thread.State.RUNNABLE) {
-            clientToRemoteThread.interrupt();
-        }
-        if (remoteToClientThread != null && remoteToClientThread.getState() == Thread.State.RUNNABLE) {
-            remoteToClientThread.interrupt();
-        }
-
+        stopConnection();
 
         // Create input and output streams for client and remote connections
         try {
@@ -94,6 +124,7 @@ public class TCPBridge {
                 }
             });
 
+            startConnection();
 
         }catch(IOException e){
             e.printStackTrace();

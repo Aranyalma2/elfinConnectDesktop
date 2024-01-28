@@ -1,17 +1,24 @@
 package Bridge;
 
+import User.User;
+
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.util.HashMap;
 
 public class BridgeCreator {
 
+    JTable table;
     int selectedRow = -1;
 
     JButton openConnection;
     JButton closeConnection;
+
+    HashMap<Integer, TCPBridge> activeBridges = new HashMap<Integer, TCPBridge>();
 
     public BridgeCreator(JTable table, JButton open, JButton close){
         openConnection = open;
@@ -22,6 +29,20 @@ public class BridgeCreator {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Generate a port and start connection to server
+                int localServerPort = 0;
+                String mac = "testMac";
+                try {
+
+                    table.setValueAt(localServerPort, selectedRow, 5); //NOT WORKS
+
+                    activeBridges.put(selectedRow, new TCPBridge(localServerPort, User.remoteServerIp, User.remoteServerPort, User.getUUID(), mac));
+                    openConnection.setEnabled(false);
+                    closeConnection.setEnabled(true);
+                }catch (IllegalThreadStateException exception){
+                    System.out.println("Open bridge ERROR");
+                    openConnection.setEnabled(true);
+                    closeConnection.setEnabled(false);
+                }
             }
         });
 
@@ -29,13 +50,18 @@ public class BridgeCreator {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Close the active connection
-
+                TCPBridge forRemove = activeBridges.remove(selectedRow);
+                forRemove.stopBridge();
+                table.setValueAt("none", selectedRow, 5);
+                openConnection.setEnabled(true);
+                closeConnection.setEnabled(false);
             }
         });
 
     }
 
-    private void addTableSelectionListener(JTable table) {
+    private void addTableSelectionListener(JTable _table) {
+        table = _table;
         ListSelectionModel selectionModel = table.getSelectionModel();
         selectionModel.addListSelectionListener(new ListSelectionListener() {
             @Override

@@ -27,9 +27,9 @@ public class Main {
         String remoteHost = "localhost"; // Remote server hostname or IP
         int remotePort = 8080; // Remote server port
 
-        BridgeServerConnection bs = new BridgeServerConnection();
+        /*BridgeServerConnection bs = new BridgeServerConnection();
         try {
-            bs.initBridge(remoteHost,remotePort,"965b963fa1b585df","Terminal-Test","98D863584D0E");
+            //bs.initBridge(remoteHost,remotePort,"965b963fa1b585df","Terminal-Test","98D863584D0E");
             Thread.sleep(10000);
             bs.buildConnection();
             bs.createBridge(localPort,remoteHost,remotePort);
@@ -38,6 +38,7 @@ public class Main {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        */
 
     }
 }

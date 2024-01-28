@@ -55,7 +55,9 @@ public class MainFrame extends WindowAdapter {
 
         JPanel bridgeBtns = new JPanel();
         JButton openConnectionButton = new JButton("Open connection");
+        openConnectionButton.setEnabled(false);
         JButton closeConnectionButton = new JButton("Close connection");
+        closeConnectionButton.setEnabled(false);
         bridgeBtns.add(openConnectionButton);
         bridgeBtns.add(closeConnectionButton);
         bridgeBtns.setLayout(new FlowLayout(FlowLayout.LEFT));
