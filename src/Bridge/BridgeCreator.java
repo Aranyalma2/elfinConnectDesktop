@@ -1,5 +1,6 @@
 package Bridge;
 
+import GUI.DevicePanel;
 import User.User;
 
 import javax.swing.*;
@@ -13,6 +14,8 @@ import java.util.HashMap;
 public class BridgeCreator {
 
     JTable table;
+
+    DevicePanel tablePanel;
     int selectedRow = -1;
 
     JButton openConnection;
@@ -20,7 +23,8 @@ public class BridgeCreator {
 
     HashMap<Integer, TCPBridge> activeBridges = new HashMap<Integer, TCPBridge>();
 
-    public BridgeCreator(JTable table, JButton open, JButton close){
+    public BridgeCreator(JTable table, DevicePanel devicePanel, JButton open, JButton close){
+        tablePanel = devicePanel;
         openConnection = open;
         closeConnection = close;
         addTableSelectionListener(table);
@@ -29,17 +33,24 @@ public class BridgeCreator {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Generate a port and start connection to server
-                int localServerPort = 0;
+                int localServerPort = 12345;
                 String mac = "testMac";
                 try {
 
                     table.setValueAt(localServerPort, selectedRow, 5); //NOT WORKS
+
+                    table.getModel().setValueAt("y", 1, 1);
+
+                    tablePanel.setValueAt("x", 2, 2);
+
+                    tablePanel.updateTable();
 
                     activeBridges.put(selectedRow, new TCPBridge(localServerPort, User.remoteServerIp, User.remoteServerPort, User.getUUID(), mac));
                     openConnection.setEnabled(false);
                     closeConnection.setEnabled(true);
                 }catch (IllegalThreadStateException exception){
                     System.out.println("Open bridge ERROR");
+                    exception.printStackTrace();
                     openConnection.setEnabled(true);
                     closeConnection.setEnabled(false);
                 }
@@ -67,7 +78,7 @@ public class BridgeCreator {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 if (!e.getValueIsAdjusting() && e.getSource() == selectionModel && selectionModel.isSelectionEmpty() == false) {
-                    selectedRow = table.getSelectedRow();
+                    selectedRow = (int)table.getValueAt(table.getSelectedRow(),0)-1;
                     System.out.println(selectedRow);
                     Object statusValue = table.getValueAt(selectedRow, 4);
                     Object connectionValue = table.getValueAt(selectedRow, 5);

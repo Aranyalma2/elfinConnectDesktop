@@ -62,8 +62,9 @@ public class MainFrame extends WindowAdapter {
         bridgeBtns.add(closeConnectionButton);
         bridgeBtns.setLayout(new FlowLayout(FlowLayout.LEFT));
 
-        JTable jTable = new JTable(new DevicePanel());
-        BridgeCreator bc = new BridgeCreator(jTable, openConnectionButton, closeConnectionButton);
+        DevicePanel tablePanel = new DevicePanel();
+        JTable jTable = new JTable(tablePanel);
+        BridgeCreator bc = new BridgeCreator(jTable, tablePanel, openConnectionButton, closeConnectionButton);
 
         // size
         jTable.getColumnModel().getColumn(0).setPreferredWidth(10);
@@ -81,7 +82,7 @@ public class MainFrame extends WindowAdapter {
 
 
         jTable.setFillsViewportHeight(true);
-        jTable.setAutoCreateRowSorter(true);
+        //jTable.setAutoCreateRowSorter(true);
         south.add(tableHeader, BorderLayout.CENTER);
         south.add(bridgeBtns,BorderLayout.CENTER);
         south.add(new JScrollPane(jTable), BorderLayout.SOUTH);

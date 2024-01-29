@@ -18,7 +18,14 @@ import java.util.ArrayList;
 
 public class DevicePanel extends AbstractTableModel{
     ArrayList<Device> devices = User.getInstance().getDevices();
-    ArrayList<String> ports;
+    ArrayList<String> ports = new ArrayList<>();
+
+    public DevicePanel(){
+        super();
+        for(int i = 0; i < devices.size(); i++){
+            ports.add(i, "none");
+        }
+    }
 
     @Override
     public int getRowCount() {
@@ -45,7 +52,7 @@ public class DevicePanel extends AbstractTableModel{
             case 4:
                 return dev.getStatus() ? "Online" : "Offline";
             case 5:
-                return "none";
+                return ports.get(r);
             default:
                 return "none";
         }
@@ -73,6 +80,7 @@ public class DevicePanel extends AbstractTableModel{
 
     public void updateTable() {
         devices = User.getInstance().getDevices();
+        setValueAt("Alma", 3,3);
         fireTableDataChanged();
     }
 }
