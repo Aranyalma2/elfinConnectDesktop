@@ -18,6 +18,8 @@ public class MainFrame extends WindowAdapter {
 
     public ServerConnectionStatusPanel serverPanel;
 
+    public DeviceTable deviceTable;
+
     public JFrame frame;
 
     private MainFrame() {
@@ -62,6 +64,10 @@ public class MainFrame extends WindowAdapter {
         bridgeBtns.add(closeConnectionButton);
         bridgeBtns.setLayout(new FlowLayout(FlowLayout.LEFT));
 
+        deviceTable =  new DeviceTable();
+        BridgeCreator bc = new BridgeCreator(deviceTable, openConnectionButton, closeConnectionButton);
+
+        /*
         DevicePanel tablePanel = new DevicePanel();
         JTable jTable = new JTable(tablePanel);
         BridgeCreator bc = new BridgeCreator(jTable, tablePanel, openConnectionButton, closeConnectionButton);
@@ -83,9 +89,11 @@ public class MainFrame extends WindowAdapter {
 
         jTable.setFillsViewportHeight(true);
         //jTable.setAutoCreateRowSorter(true);
+        */
         south.add(tableHeader, BorderLayout.CENTER);
         south.add(bridgeBtns,BorderLayout.CENTER);
-        south.add(new JScrollPane(jTable), BorderLayout.SOUTH);
+        south.add(new JScrollPane(deviceTable), BorderLayout.SOUTH);
+        //south.add(new JScrollPane(jTable), BorderLayout.SOUTH);
     }
 
     private void setupFrame(JFrame frame) {
