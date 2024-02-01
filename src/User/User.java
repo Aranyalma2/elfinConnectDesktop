@@ -10,6 +10,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
+
+
 public class User {
     private transient static User singelton;
     private transient static final String configFile = "user.conf";
@@ -20,11 +22,16 @@ public class User {
 
     public static int remoteServerPort;
 
-    private transient ArrayList<Device> DeviceList = new ArrayList<>();
+    private transient static DeviceQueryThread deviceQueryThread;
+
+    private transient static ArrayList<Device> DeviceList = new ArrayList<>();
+    private transient static ArrayList<Integer> portList = new ArrayList<>();
 
     // Constructor
     private User() {
         loadUser();
+        deviceQueryThread = new DeviceQueryThread(uuid, remoteServerIp, remoteServerPort);
+        deviceQueryThread.start();
     }
 
     private User(String user, String ip, int port) throws IOException {
@@ -32,6 +39,8 @@ public class User {
         remoteServerIp = ip;
         remoteServerPort = port;
         saveUser();
+        deviceQueryThread = new DeviceQueryThread(uuid, remoteServerIp, remoteServerPort);
+        deviceQueryThread.start();
     }
 
     // Singelton getter
@@ -52,8 +61,12 @@ public class User {
         return remoteServerIp + ":" + Integer.toString(remoteServerPort);
     }
 
+    public boolean getRemoteServerStatus(){
+        return deviceQueryThread.getConnectionStatus();
+    }
+
     // Get DeviceList
-    public ArrayList<Device> getDevices() {
+    public ArrayList<Device> getDevices()  {
         return DeviceList;
     }
 
@@ -68,9 +81,8 @@ public class User {
     }
 
     // Overwrite DeviceList to a newer one
-    synchronized public void updateDeviceList(ArrayList<Device> newList) {
-        DeviceList = newList;
-        notifyAll();
+    public void updateDeviceList(String list) {
+        DeviceList = DeviceFromJson.convert(list);
     }
 
     // Update User uuid and server address
@@ -88,6 +100,8 @@ public class User {
         }catch(IllegalArgumentException parse) {
             throw new IllegalArgumentException (serverField);
         }
+        deviceQueryThread.interruptSleep();
+        deviceQueryThread.interruptKill();
 
         singelton = new User(uuidField, ip, port);
     }
