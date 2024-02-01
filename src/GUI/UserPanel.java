@@ -53,8 +53,6 @@ public class UserPanel extends JPanel {
             try {
                 User.updateUser(uuidTEXT.getText(), serverTEXT.getText());
 
-                //HERE SHOULD START LOGIN AND PINGING THREADS
-
             }catch(IllegalArgumentException ie) {
                 //INVALID SERVER ADDRESS INPUT
                 addressErrorDialog(ie.getMessage());
