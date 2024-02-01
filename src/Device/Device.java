@@ -17,9 +17,9 @@ public class Device {
     }
 
     public Device(JSONObject jsonObject) throws JSONException {
-            hostName = jsonObject.getString("host");
+            hostName = jsonObject.getString("hostname");
             mac = jsonObject.getString("macaddress");
-            lastSeen = jsonObject.getString("lastseen");
+            lastSeen = jsonObject.getString("lastseendate");
             if (jsonObject.getString("status").equals("online")) {
                 status = true;
             } else {
