@@ -4,23 +4,16 @@ import Device.Device;
 import User.User;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
-public class DevicePanel extends AbstractTableModel{
-    ArrayList<Device> devices = User.getInstance().getDevices();
+public class deprecated_DevicePanel extends AbstractTableModel{
+    ArrayList<Device> devices; /*=User.getInstance().getDevices()*/;
     ArrayList<String> ports = new ArrayList<>();
 
-    public DevicePanel(){
+    public deprecated_DevicePanel(){
         super();
         for(int i = 0; i < devices.size(); i++){
             ports.add(i, "none");
@@ -78,9 +71,8 @@ public class DevicePanel extends AbstractTableModel{
         return String.class;
     }
 
-    public void updateTable() {
+    public void updateTable() throws InterruptedException {
         devices = User.getInstance().getDevices();
-        setValueAt("Alma", 3,3);
         fireTableDataChanged();
     }
 }

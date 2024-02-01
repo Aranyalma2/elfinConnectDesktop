@@ -4,7 +4,7 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class BridgeServerConnection {
+public class deprecated_BridgeServerConnection {
 
     //Local tcp server port
     private int localPort = 0;
