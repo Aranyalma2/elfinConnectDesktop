@@ -25,7 +25,8 @@ public class TCPBridge {
     String connect = "";
 
     public TCPBridge(int localServerPort, String remoteHost, int remotePort, String uuid, String endDeviceMAC) throws IllegalThreadStateException {
-        header = "data;"+uuid+";"+endDeviceMAC+";";
+        String mockMac = "T" +  Integer.toString(localServerPort);
+        header = "data;"+uuid+";"+mockMac+";";
         connect = "connme;"+uuid+";"+endDeviceMAC;
 
         try {
@@ -36,6 +37,7 @@ public class TCPBridge {
             remoteSocket.getOutputStream().write(connect.getBytes());
 
         }catch(IOException e){
+            e.printStackTrace();
             throw new IllegalThreadStateException("Local connection error");
         }
 
@@ -50,14 +52,22 @@ public class TCPBridge {
                     throw new IllegalThreadStateException("Local connection error");
                 }
             }
+
             stopConnection();
+
         });
         localConnectionHandlerThread.start();
 
     }
 
     public void stopBridge(){
-        localConnectionHandlerThread.interrupt();
+        try {
+            System.out.println("Stop local and remote sockets");
+            localServer.close();
+            remoteSocket.close();
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to close the local/remote sockets");
+        }
     }
 
     private void startConnection(){
@@ -72,6 +82,11 @@ public class TCPBridge {
         if (remoteToClientThread != null && remoteToClientThread.getState() == Thread.State.RUNNABLE) {
             remoteToClientThread.interrupt();
         }
+    }
+
+    private void restartConnection(){
+        stopConnection();
+        startConnection();
     }
 
 
@@ -94,8 +109,6 @@ public class TCPBridge {
                     int bytesRead;
                     byte[] buffer = new byte[1024];
 
-                    remoteOutput.write(connect.getBytes());
-
                     while (!Thread.currentThread().isInterrupted() && (bytesRead = clientInput.read(buffer)) != -1) {
                         // Create a custom header and attach the message
 
@@ -105,7 +118,7 @@ public class TCPBridge {
                         remoteOutput.write(combinedMessage.getBytes());
                     }
                 } catch (IOException e) {
-                    stopConnection();
+                    restartConnection();
                     throw new IllegalThreadStateException("Remote client->server connection error");
                 }
             });
@@ -119,7 +132,7 @@ public class TCPBridge {
                         clientOutput.write(buffer, 0, bytesRead);
                     }
                 } catch (IOException e) {
-                    stopConnection();
+                    restartConnection();
                     throw new IllegalThreadStateException("Remote server->client connection error");
                 }
             });
