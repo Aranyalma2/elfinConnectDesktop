@@ -1,6 +1,6 @@
 package Bridge;
 
-import GUI.DevicePanel;
+import GUI.DeviceTable;
 import User.User;
 
 import javax.swing.*;
@@ -13,9 +13,8 @@ import java.util.HashMap;
 
 public class BridgeCreator {
 
-    JTable table;
+    DeviceTable table;
 
-    DevicePanel tablePanel;
     int selectedRow = -1;
 
     JButton openConnection;
@@ -23,8 +22,8 @@ public class BridgeCreator {
 
     HashMap<Integer, TCPBridge> activeBridges = new HashMap<Integer, TCPBridge>();
 
-    public BridgeCreator(JTable table, DevicePanel devicePanel, JButton open, JButton close){
-        tablePanel = devicePanel;
+    public BridgeCreator(DeviceTable _table, JButton open, JButton close){
+        table = _table;
         openConnection = open;
         closeConnection = close;
         addTableSelectionListener(table);
@@ -34,23 +33,20 @@ public class BridgeCreator {
             public void actionPerformed(ActionEvent e) {
                 // Generate a port and start connection to server
                 int localServerPort = 12345;
-                String mac = "testMac";
+                int selected = selectedRow;
                 try {
 
-                    table.setValueAt(localServerPort, selectedRow, 5); //NOT WORKS
+                    String mac = (String)table.getValueAt(selected, 2);
 
-                    table.getModel().setValueAt("y", 1, 1);
-
-                    tablePanel.setValueAt("x", 2, 2);
-
-                    tablePanel.updateTable();
-
-                    activeBridges.put(selectedRow, new TCPBridge(localServerPort, User.remoteServerIp, User.remoteServerPort, User.getUUID(), mac));
+                    activeBridges.put(selected, new TCPBridge(localServerPort, User.remoteServerIp, User.remoteServerPort, User.getUUID(), mac));
+                    table.setValueAt(localServerPort, selected, 5);
                     openConnection.setEnabled(false);
                     closeConnection.setEnabled(true);
                 }catch (IllegalThreadStateException exception){
                     System.out.println("Open bridge ERROR");
                     exception.printStackTrace();
+
+                    table.setValueAt("none", selected, 5);
                     openConnection.setEnabled(true);
                     closeConnection.setEnabled(false);
                 }
@@ -71,8 +67,7 @@ public class BridgeCreator {
 
     }
 
-    private void addTableSelectionListener(JTable _table) {
-        table = _table;
+    private void addTableSelectionListener(JTable table) {
         ListSelectionModel selectionModel = table.getSelectionModel();
         selectionModel.addListSelectionListener(new ListSelectionListener() {
             @Override
