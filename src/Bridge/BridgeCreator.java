@@ -9,6 +9,8 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class BridgeCreator {
@@ -32,23 +34,32 @@ public class BridgeCreator {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Generate a port and start connection to server
-                int localServerPort = 12345;
-                int selected = selectedRow;
+                int localServerPort = generatePort(0);
+                String mac = (String)table.getValueAt(selectedRow, 2);
                 try {
+                    boolean localServerPort_Good = false;
+                    while(!localServerPort_Good) {
+                        try {
+                            activeBridges.put(selectedRow, new TCPBridge(localServerPort, User.remoteServerIp, User.remoteServerPort, User.getUUID(), mac));
+                            localServerPort_Good = true;
+                        } catch (RuntimeException runtimeException) {
+                            localServerPort = generatePort(localServerPort);
+                        }
+                    }
 
-                    String mac = (String)table.getValueAt(selected, 2);
-
-                    activeBridges.put(selected, new TCPBridge(localServerPort, User.remoteServerIp, User.remoteServerPort, User.getUUID(), mac));
-                    table.setValueAt(localServerPort, selected, 5);
                     openConnection.setEnabled(false);
                     closeConnection.setEnabled(true);
-                }catch (IllegalThreadStateException exception){
+                }catch (IOException exception){
                     System.out.println("Open bridge ERROR");
                     exception.printStackTrace();
 
-                    table.setValueAt("none", selected, 5);
+                    localServerPort = 0;
+
                     openConnection.setEnabled(true);
                     closeConnection.setEnabled(false);
+                } finally {
+                    User.getInstance().updatePort(mac, localServerPort);
+                    table.refreshTable();
                 }
             }
         });
@@ -59,7 +70,11 @@ public class BridgeCreator {
                 // Close the active connection
                 TCPBridge forRemove = activeBridges.remove(selectedRow);
                 forRemove.stopBridge();
-                table.setValueAt("none", selectedRow, 5);
+
+                String mac = (String)table.getValueAt(selectedRow, 2);
+                User.getInstance().updatePort(mac, 0);
+                table.refreshTable();
+
                 openConnection.setEnabled(true);
                 closeConnection.setEnabled(false);
             }
@@ -89,5 +104,29 @@ public class BridgeCreator {
                 }
             }
         });
+    }
+
+    private int generatePort(int reference){
+        ArrayList<Integer> ports = new ArrayList<>(User.getInstance().getPorts());
+        ports.removeIf(n -> n == 0);
+
+        int possiblePort;
+
+        if(reference != 0 && !ports.contains(reference)){
+            possiblePort = reference;
+        }
+        else{
+            if (ports.isEmpty()) {
+                //Default
+                return 50000;
+            }
+            possiblePort = Collections.max(ports);
+        }
+
+        if (possiblePort <= 65564) {
+            return possiblePort + 1;
+        } else {
+            return Collections.min(ports) - 1;
+        }
     }
 }

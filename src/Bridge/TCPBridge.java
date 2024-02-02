@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.ServerSocket;
+import java.util.MissingResourceException;
 
 public class TCPBridge {
     private ServerSocket localServer = null;
@@ -24,7 +25,7 @@ public class TCPBridge {
     //Connection fabrication message
     String connect = "";
 
-    public TCPBridge(int localServerPort, String remoteHost, int remotePort, String uuid, String endDeviceMAC) throws IllegalThreadStateException {
+    public TCPBridge(int localServerPort, String remoteHost, int remotePort, String uuid, String endDeviceMAC) throws RuntimeException, IOException {
         String mockMac = "T" +  Integer.toString(localServerPort);
         header = "data;"+uuid+";"+mockMac+";";
         connect = "connme;"+uuid+";"+endDeviceMAC;
@@ -33,12 +34,18 @@ public class TCPBridge {
 
             localServer = new ServerSocket(localServerPort);
 
-            remoteSocket = new Socket(remoteHost, remotePort);
-            remoteSocket.getOutputStream().write(connect.getBytes());
 
         }catch(IOException e){
             e.printStackTrace();
-            throw new IllegalThreadStateException("Local connection error");
+            throw new RuntimeException("Unable to open local server");
+        }
+
+        try{
+            remoteSocket = new Socket(remoteHost, remotePort);
+            remoteSocket.getOutputStream().write(connect.getBytes());
+        }catch(IOException e){
+            localServer.close();
+            throw new IOException("Unable to connect remote host");
         }
 
         localConnectionHandlerThread = new Thread(() -> {
@@ -48,12 +55,12 @@ public class TCPBridge {
                     createConnectionThreads();
 
                 } catch (IOException e) {
-                    stopConnection();
-                    throw new IllegalThreadStateException("Local connection error");
+                    break;
                 }
             }
 
             stopConnection();
+            System.out.println("Bridge demolished");
 
         });
         localConnectionHandlerThread.start();

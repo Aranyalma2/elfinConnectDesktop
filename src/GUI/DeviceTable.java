@@ -11,9 +11,8 @@ import java.util.ArrayList;
 
 public class DeviceTable extends JTable {
 
-    ArrayList<Device> devices = User.getInstance().getDevices();
-    ArrayList<String> ports = new ArrayList<>();
-    private int deviceNo = 0;
+    ArrayList<Device> devices;
+    ArrayList<Integer> ports;
     DefaultTableModel model;
 
     public DeviceTable(){
@@ -44,11 +43,6 @@ public class DeviceTable extends JTable {
             this.getColumnModel().getColumn(i).setCellRenderer(i!=4?new TableCellCenterRenderer():new TableCellColorRenderer(Color.green, Color.red));
         }
 
-        //Set ports default "none" stage
-        for(int i = 0; i < devices.size(); i++){
-            ports.add(i, "none");
-        }
-
         refreshTable();
 
     }
@@ -60,12 +54,14 @@ public class DeviceTable extends JTable {
 
         devices = User.getInstance().getDevices();
 
-        deviceNo = 0;
+        ports = User.getInstance().getPorts();
+
+        int deviceNo = 0;
 
         // Populate the table with data from the updated hostList
         for (Device device : devices) {
-            Object[] rowData = {deviceNo+1, device.getHostName(), device.getMac(),
-                    device.getSeen(), device.getStatus() ? "Online" : "Offline", ports.get(deviceNo)};
+            Object[] rowData = {deviceNo +1, device.getHostName(), device.getMac(),
+                    device.getSeen(), device.getStatus() ? "Online" : "Offline", ports.get(deviceNo) != 0 ? ports.get(deviceNo) : "none"};
             deviceNo++;
             model.addRow(rowData);
         }

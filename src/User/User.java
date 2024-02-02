@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-
+import java.util.Objects;
 
 
 public class User {
@@ -24,7 +24,7 @@ public class User {
 
     private transient static DeviceQueryThread deviceQueryThread;
 
-    private transient static ArrayList<Device> DeviceList = new ArrayList<>();
+    private transient static ArrayList<Device> deviceList = new ArrayList<>();
     private transient static ArrayList<Integer> portList = new ArrayList<>();
 
     // Constructor
@@ -65,14 +65,18 @@ public class User {
         return deviceQueryThread.getConnectionStatus();
     }
 
-    // Get DeviceList
+    // Get deviceList
     public ArrayList<Device> getDevices()  {
-        return DeviceList;
+        return deviceList;
+    }
+
+    public ArrayList<Integer> getPorts()  {
+        return portList;
     }
 
     // Get Device by MAC
-    public Device getDeviceByMAC(String macAddr) {
-        for (Device i : DeviceList) {
+    private Device getDeviceByMAC(String macAddr) {
+        for (Device i : deviceList) {
             if (i.getMac().equals(macAddr)) {
                 return i;
             }
@@ -80,9 +84,44 @@ public class User {
         return null;
     }
 
-    // Overwrite DeviceList to a newer one
+    public void updatePort(String mac, Integer port){
+
+        for(int i = 0; i < deviceList.size(); i++){
+            if(deviceList.get(i).getMac().equals(mac)){
+                portList.set(i, port);
+            }
+        }
+
+    }
+
+    // Overwrite deviceList to a newer one
     public void updateDeviceList(String list) {
-        DeviceList = DeviceFromJson.convert(list);
+
+        ArrayList<Device> newDeviceList = DeviceFromJson.convert(list);
+
+        ArrayList<Integer> newPortList = new ArrayList<>();
+
+        for(Device old_device : deviceList) {
+            System.out.println(old_device.getMac());
+        }
+
+        int new_devIdx = 0;
+        for(Device new_device : newDeviceList){
+            int old_devIdx = 0;
+            newPortList.add(0);
+            for(Device old_device : deviceList){
+                if (Objects.equals(old_device.getMac(), new_device.getMac())) {
+                    newPortList.set(new_devIdx, portList.get(old_devIdx));
+                    break;
+                }
+                old_devIdx++;
+            }
+            new_devIdx++;
+        }
+
+
+        deviceList = newDeviceList;
+        portList = newPortList;
     }
 
     // Update User uuid and server address
