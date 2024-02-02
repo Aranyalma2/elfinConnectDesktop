@@ -46,7 +46,7 @@ public class DeviceQueryThread extends Thread {
 
                         // Read and log the server's response
                         String response = readServerResponse(inputStream);
-                        System.out.println("Server Response: " + response);
+                       // System.out.println("Server Response: " + response);
                         User.getInstance().updateDeviceList(response);
 
                         remoteServerStatus = true;

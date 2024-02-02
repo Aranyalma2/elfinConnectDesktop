@@ -101,10 +101,6 @@ public class User {
 
         ArrayList<Integer> newPortList = new ArrayList<>();
 
-        for(Device old_device : deviceList) {
-            System.out.println(old_device.getMac());
-        }
-
         int new_devIdx = 0;
         for(Device new_device : newDeviceList){
             int old_devIdx = 0;
