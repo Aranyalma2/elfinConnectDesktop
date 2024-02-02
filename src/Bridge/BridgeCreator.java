@@ -89,7 +89,6 @@ public class BridgeCreator {
             public void valueChanged(ListSelectionEvent e) {
                 if (!e.getValueIsAdjusting() && e.getSource() == selectionModel && selectionModel.isSelectionEmpty() == false) {
                     selectedRow = (int)table.getValueAt(table.getSelectedRow(),0)-1;
-                    System.out.println(selectedRow);
                     Object statusValue = table.getValueAt(selectedRow, 4);
                     Object connectionValue = table.getValueAt(selectedRow, 5);
 
