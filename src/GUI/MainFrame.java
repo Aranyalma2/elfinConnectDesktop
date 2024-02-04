@@ -136,12 +136,9 @@ public class MainFrame extends WindowAdapter {
         }
     }
     public void timeoutErrorDialog() {
-        String message = "Server connection lost:\n" + User.getAddress();
-        String[] buttons = { "Reconnect", "Cancel" };
-        int selected = JOptionPane.showOptionDialog(frame, message, "Server Error", JOptionPane.ERROR_MESSAGE, 0, null, buttons, buttons[0]);
-        if(selected != -1 && buttons[selected].equals(buttons[0])) {
-            //HERE SHOULD START LOGIN AND PINGING THREADS
-        }
+        String message = "Server connection lost:\n" + User.getAddress() + "\nReconnecting...";
+        String[] buttons = { "Understood" };
+        int selected = JOptionPane.showOptionDialog(frame, message, "Server Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, buttons, buttons[0]);
     }
 
 

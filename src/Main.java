@@ -2,10 +2,6 @@ import Device.Device;
 import GUI.MainFrame;
 import GUI.ServerConnectionStatusPanel;
 import User.User;
-import User.DeviceQueryThread;
-
-import java.io.IOException;
-import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args) {

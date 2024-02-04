@@ -1,4 +1,6 @@
 package User;
+import GUI.MainFrame;
+
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -55,6 +57,7 @@ public class DeviceQueryThread extends Thread {
                     }
                 } catch (IOException e) {
                     e.printStackTrace(); // Handle connection-related IO exceptions
+                    MainFrame.getInstance().timeoutErrorDialog();
                     // If an IOException occurs while establishing a socket, restart the socket
                     try{
                         remoteServerStatus = false;
