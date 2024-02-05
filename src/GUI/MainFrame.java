@@ -39,10 +39,10 @@ public class MainFrame extends WindowAdapter {
         JPanel northPanel = new JPanel();
         northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.LINE_AXIS));
 
-        userPanel = new UserPanel();
-        northPanel.add(userPanel);
-
         serverPanel = new ServerConnectionStatusPanel();
+
+        userPanel = new UserPanel(serverPanel);
+        northPanel.add(userPanel);
 
         northPanel.add(serverPanel);
 
