@@ -1,9 +1,11 @@
 package User;
+import Device.Device;
 import GUI.MainFrame;
 
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
@@ -57,7 +59,9 @@ public class DeviceQueryThread extends Thread {
                     }
                 } catch (IOException e) {
                     e.printStackTrace(); // Handle connection-related IO exceptions
+                    User.getInstance().updateDeviceList("");
                     MainFrame.getInstance().timeoutErrorDialog();
+
                     // If an IOException occurs while establishing a socket, restart the socket
                     try{
                         remoteServerStatus = false;
