@@ -1,7 +1,5 @@
 package User;
 
-import GUI.MainFrame;
-
 import Device.Device;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -97,7 +95,7 @@ public class User {
     // Overwrite deviceList to a newer one
     public void updateDeviceList(String list) {
 
-        ArrayList<Device> newDeviceList = DeviceFromJson.convert(list);
+        ArrayList<Device> newDeviceList = DataFromJson.convertJsonToDevs(list);
 
         ArrayList<Integer> newPortList = new ArrayList<>();
 
