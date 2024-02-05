@@ -28,7 +28,6 @@ public class DataFromJson {
 
     public static boolean convertJsonToStatus(String listString){
         try {
-            System.out.println(listString);
             JSONObject jsonObject = new JSONObject(listString);
             return jsonObject.getString("status").equals("success");
         } catch (JSONException e) {
