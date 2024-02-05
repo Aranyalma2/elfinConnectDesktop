@@ -22,6 +22,8 @@ public class MainFrame extends WindowAdapter {
 
     public JFrame frame;
 
+    private BridgeCreator bridgeCreator;
+
     private MainFrame() {
         frame = new JFrame("Elfin Bridge Client");
     }
@@ -65,35 +67,11 @@ public class MainFrame extends WindowAdapter {
         bridgeBtns.setLayout(new FlowLayout(FlowLayout.LEFT));
 
         deviceTable =  new DeviceTable();
-        BridgeCreator bc = new BridgeCreator(deviceTable, openConnectionButton, closeConnectionButton);
+        bridgeCreator = new BridgeCreator(deviceTable, openConnectionButton, closeConnectionButton);
 
-        /*
-        DevicePanel tablePanel = new DevicePanel();
-        JTable jTable = new JTable(tablePanel);
-        BridgeCreator bc = new BridgeCreator(jTable, tablePanel, openConnectionButton, closeConnectionButton);
-
-        // size
-        jTable.getColumnModel().getColumn(0).setPreferredWidth(10);
-        jTable.getColumnModel().getColumn(1).setMinWidth(150);
-        jTable.getColumnModel().getColumn(2).setMinWidth(150);
-        jTable.getColumnModel().getColumn(3).setMinWidth(150);
-        jTable.getColumnModel().getColumn(4).setMinWidth(75);
-        jTable.getColumnModel().getColumn(5).setMinWidth(75);
-        // color
-        jTable.getColumnModel().getColumn(0).setCellRenderer(new TableCenterRenderer());
-        jTable.getColumnModel().getColumn(1).setCellRenderer(new TableCenterRenderer());
-        jTable.getColumnModel().getColumn(2).setCellRenderer(new TableCenterRenderer());
-        jTable.getColumnModel().getColumn(3).setCellRenderer(new TableCenterRenderer());
-        jTable.getColumnModel().getColumn(4).setCellRenderer(new TableColorRenderer(Color.green, Color.red));
-
-
-        jTable.setFillsViewportHeight(true);
-        //jTable.setAutoCreateRowSorter(true);
-        */
         south.add(tableHeader, BorderLayout.CENTER);
         south.add(bridgeBtns,BorderLayout.CENTER);
         south.add(new JScrollPane(deviceTable), BorderLayout.SOUTH);
-        //south.add(new JScrollPane(jTable), BorderLayout.SOUTH);
     }
 
     private void setupFrame(JFrame frame) {
@@ -122,9 +100,9 @@ public class MainFrame extends WindowAdapter {
         frame.pack();
     }
 
-    public void serverErrorDialog() {
-        String message = "Unable to connect server:\n" + User.getAddress();
-        JOptionPane.showMessageDialog(frame, message, "Server Error", JOptionPane.ERROR_MESSAGE);
+    public void localServerErrorDialog(String port) {
+        String message = "Unable to create local server:\nlocalhost:" + port;
+        JOptionPane.showMessageDialog(frame, message, "Local error", JOptionPane.ERROR_MESSAGE);
     }
 
     public void authErrorDialog() {
@@ -138,7 +116,13 @@ public class MainFrame extends WindowAdapter {
     public void timeoutErrorDialog() {
         String message = "Server connection lost:\n" + User.getAddress() + "\nReconnecting...";
         String[] buttons = { "Understood" };
-        int selected = JOptionPane.showOptionDialog(frame, message, "Server Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, buttons, buttons[0]);
+        int selected = JOptionPane.showOptionDialog(frame, message, "Connection error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, buttons, buttons[0]);
+        MainFrame.getInstance().serverPanel.setConnectionStatus(ServerConnectionStatusPanel.ConnectionStatus.NOT_CONNECTED);
+        bridgeCreator.stopAllActiveBridge();
+    }
+
+    public void bridgeErrorDialog(String reason) {
+        JOptionPane.showMessageDialog(frame, reason, "Bridge error", JOptionPane.ERROR_MESSAGE);
     }
 
 
