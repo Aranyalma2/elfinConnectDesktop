@@ -142,5 +142,7 @@ public class BridgeCreator {
         for (Integer id : activeBridges.keySet()){
             stopBridge(id);
         }
+        openConnection.setEnabled(false);
+        closeConnection.setEnabled(false);
     }
 }
