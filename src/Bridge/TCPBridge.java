@@ -1,10 +1,11 @@
 package Bridge;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import User.DataFromJson;
+
+import java.io.*;
 import java.net.Socket;
 import java.net.ServerSocket;
+import java.nio.charset.StandardCharsets;
 import java.util.MissingResourceException;
 
 public class TCPBridge {
@@ -40,12 +41,20 @@ public class TCPBridge {
             throw new RuntimeException("Unable to open local server");
         }
 
+        boolean connectionStatus = false;
         try{
             remoteSocket = new Socket(remoteHost, remotePort);
+            //remoteSocket.setSoTimeout(5000);
             remoteSocket.getOutputStream().write(connect.getBytes());
+            connectionStatus = DataFromJson.convertJsonToStatus(readServerResponse(remoteSocket.getInputStream()));
+
         }catch(IOException e){
             localServer.close();
             throw new IOException("Unable to connect remote host");
+        }
+
+        if(!connectionStatus){
+            throw new IOException("Server refused the bridge creation request");
         }
 
         localConnectionHandlerThread = new Thread(() -> {
@@ -65,6 +74,22 @@ public class TCPBridge {
         });
         localConnectionHandlerThread.start();
 
+    }
+
+    private String readServerResponse(InputStream inputStream) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        StringBuilder responseBuilder = new StringBuilder();
+        char[] buffer = new char[1024]; // Adjust buffer size as needed
+
+        int bytesRead;
+        while ((bytesRead = reader.read(buffer)) != -1) {
+            responseBuilder.append(buffer, 0, bytesRead);
+            if((int)buffer[bytesRead-1] == 10){
+                break;
+            }
+        }
+        String response = responseBuilder.toString(); ;
+        return response.substring(0, response.length() - 1);
     }
 
     public void stopBridge(){
