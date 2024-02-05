@@ -12,7 +12,10 @@ public class UserPanel extends JPanel {
     JTextField uuidTEXT;
     JTextField serverTEXT;
 
-    public UserPanel(){
+    ServerConnectionStatusPanel status;
+
+    public UserPanel(ServerConnectionStatusPanel _status){
+        status = _status;
         //USER SECTION
 
         //--LEFT--
@@ -52,7 +55,7 @@ public class UserPanel extends JPanel {
         public void actionPerformed(ActionEvent e) {
             try {
                 User.updateUser(uuidTEXT.getText(), serverTEXT.getText());
-
+                status.setConnectionStatus(ServerConnectionStatusPanel.ConnectionStatus.CONNECTING);
             }catch(IllegalArgumentException ie) {
                 //INVALID SERVER ADDRESS INPUT
                 addressErrorDialog(ie.getMessage());
