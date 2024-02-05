@@ -54,6 +54,7 @@ public class TCPBridge {
         }
 
         if(!connectionStatus){
+            localServer.close();
             throw new IOException("Server refused the bridge creation request");
         }
 
