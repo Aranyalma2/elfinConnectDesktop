@@ -2,6 +2,7 @@ package GUI;
 
 import User.User;
 import Bridge.BridgeCreator;
+import SW.SWdata;
 
 import java.awt.*;
 
@@ -25,7 +26,7 @@ public class MainFrame extends WindowAdapter {
     private BridgeCreator bridgeCreator;
 
     private MainFrame() {
-        frame = new JFrame("Elfin Bridge Client");
+        frame = new JFrame("Elfin Bridge Client " + SWdata.version);
     }
 
     public static MainFrame getInstance() {
@@ -114,11 +115,14 @@ public class MainFrame extends WindowAdapter {
         }
     }
     public void timeoutErrorDialog() {
+
+        MainFrame.getInstance().serverPanel.setConnectionStatus(ServerConnectionStatusPanel.ConnectionStatus.NOT_CONNECTED);
+        bridgeCreator.stopAllActiveBridge();
+
         String message = "Server connection lost:\n" + User.getAddress() + "\nReconnecting...";
         String[] buttons = { "Understood" };
         int selected = JOptionPane.showOptionDialog(frame, message, "Connection error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, buttons, buttons[0]);
-        MainFrame.getInstance().serverPanel.setConnectionStatus(ServerConnectionStatusPanel.ConnectionStatus.NOT_CONNECTED);
-        bridgeCreator.stopAllActiveBridge();
+
     }
 
     public void bridgeErrorDialog(String reason) {
