@@ -28,7 +28,7 @@ public class TCPBridge {
 
     public TCPBridge(int localServerPort, String remoteHost, int remotePort, String uuid, String endDeviceMAC) throws RuntimeException, IOException {
         String mockMac = "T" +  Integer.toString(localServerPort);
-        header = "data;"+uuid+";"+mockMac+";";
+        header = "data;"+uuid+";"+mockMac+";"+mockMac+";1;";
         connect = "connme;"+uuid+";"+endDeviceMAC;
 
         try {
@@ -44,10 +44,10 @@ public class TCPBridge {
         boolean connectionStatus = false;
         try{
             remoteSocket = new Socket(remoteHost, remotePort);
-            //remoteSocket.setSoTimeout(5000);
+            remoteSocket.setSoTimeout(5000);
             remoteSocket.getOutputStream().write(connect.getBytes());
             connectionStatus = DataFromJson.convertJsonToStatus(readServerResponse(remoteSocket.getInputStream()));
-
+            remoteSocket.setSoTimeout(1800000);
         }catch(IOException e){
             localServer.close();
             throw new IOException("Unable to connect remote host");
