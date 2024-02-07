@@ -11,13 +11,12 @@ public class Main {
         MainFrame main = MainFrame.getInstance();
         main.createGUI();
 
-        while(true){
+        while (true) {
 
             MainFrame.getInstance().deviceTable.refreshTable();
-            if(User.getInstance().getRemoteServerStatus()){
+            if (User.getInstance().getRemoteServerStatus()) {
                 MainFrame.getInstance().serverPanel.setConnectionStatus(ServerConnectionStatusPanel.ConnectionStatus.CONNECTED);
-            }
-            else{
+            } else {
                 MainFrame.getInstance().serverPanel.setConnectionStatus(ServerConnectionStatusPanel.ConnectionStatus.NOT_CONNECTED);
             }
 
