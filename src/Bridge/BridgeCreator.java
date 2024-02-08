@@ -23,7 +23,7 @@ public class BridgeCreator {
     JButton openConnection;
     JButton closeConnection;
 
-    HashMap<Integer, TCPBridge> activeBridges = new HashMap<Integer, TCPBridge>();
+    HashMap<String, TCPBridge> activeBridges = new HashMap<String, TCPBridge>();
 
     public BridgeCreator(DeviceTable _table, JButton open, JButton close) {
         table = _table;
@@ -34,28 +34,29 @@ public class BridgeCreator {
         openConnection.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                startBridge(selectedRow);
+                String mac = (String) table.getValueAt(selectedRow, 2);
+                startBridge(mac);
             }
         });
 
         closeConnection.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                stopBridge(selectedRow);
+                String mac = (String) table.getValueAt(selectedRow, 2);
+                stopBridge(mac);
             }
         });
 
     }
 
-    private void startBridge(int id) {
+    private void startBridge(String mac) {
         // Generate a port and start connection to server
-        int localServerPort = generatePort(0);
-        String mac = (String) table.getValueAt(id, 2);
+
         try {
             boolean localServerPort_Good = false;
             while (!localServerPort_Good) {
                 try {
-                    activeBridges.put(id, new TCPBridge(localServerPort, User.remoteServerIp, User.remoteServerPort, User.getUUID(), mac));
+                    activeBridges.put(mac, new TCPBridge(localServerPort, User.remoteServerIp, User.remoteServerPort, User.getUUID(), mac));
                     localServerPort_Good = true;
                 } catch (RuntimeException runtimeException) {
                     localServerPort = generatePort(localServerPort);
@@ -79,12 +80,11 @@ public class BridgeCreator {
         }
     }
 
-    private void stopBridge(int id) {
+    private void stopBridge(String mac) {
         // Close the active connection
-        TCPBridge forRemove = activeBridges.remove(id);
+        TCPBridge forRemove = activeBridges.remove(mac);
         forRemove.stopBridge();
 
-        String mac = (String) table.getValueAt(id, 2);
         User.getInstance().updatePort(mac, 0);
         table.refreshTable();
 
@@ -97,7 +97,7 @@ public class BridgeCreator {
         selectionModel.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                if (!e.getValueIsAdjusting() && e.getSource() == selectionModel && selectionModel.isSelectionEmpty() == false) {
+                if (!e.getValueIsAdjusting() && e.getSource() == selectionModel && !selectionModel.isSelectionEmpty()) {
                     selectedRow = (int) table.getValueAt(table.getSelectedRow(), 0) - 1;
                     Object statusValue = table.getValueAt(selectedRow, 4);
                     Object connectionValue = table.getValueAt(selectedRow, 5);
@@ -106,6 +106,9 @@ public class BridgeCreator {
                         openConnection.setEnabled("none".equals(connectionValue));
                         closeConnection.setEnabled(!"none".equals(connectionValue));
                     } else {
+                        if(!"none".equals(connectionValue)){
+                            stopBridge((String) table.getValueAt(selectedRow, 2));
+                        }
                         openConnection.setEnabled(false);
                         closeConnection.setEnabled(false);
                     }
@@ -139,8 +142,8 @@ public class BridgeCreator {
     }
 
     public void stopAllActiveBridge() {
-        for (Integer id : activeBridges.keySet()){
-            stopBridge(id);
+        for (String mac : activeBridges.keySet()){
+            stopBridge(mac);
         }
         openConnection.setEnabled(false);
         closeConnection.setEnabled(false);
