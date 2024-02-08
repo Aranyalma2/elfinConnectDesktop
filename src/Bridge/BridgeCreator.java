@@ -51,6 +51,8 @@ public class BridgeCreator {
 
     private void startBridge(String mac) {
         // Generate a port and start connection to server
+        //int localServerPort = generatePort(0);
+        int localServerPort = 0;
 
         try {
             boolean localServerPort_Good = false;
@@ -58,6 +60,7 @@ public class BridgeCreator {
                 try {
                     activeBridges.put(mac, new TCPBridge(localServerPort, User.remoteServerIp, User.remoteServerPort, User.getUUID(), mac));
                     localServerPort_Good = true;
+                    localServerPort = activeBridges.get(mac).getLocalPort();
                 } catch (RuntimeException runtimeException) {
                     localServerPort = generatePort(localServerPort);
                 }

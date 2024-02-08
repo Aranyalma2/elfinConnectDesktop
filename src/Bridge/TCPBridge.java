@@ -77,6 +77,10 @@ public class TCPBridge {
 
     }
 
+    public int getLocalPort(){
+        return localServer.getLocalPort();
+    }
+
     private String readServerResponse(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         StringBuilder responseBuilder = new StringBuilder();
