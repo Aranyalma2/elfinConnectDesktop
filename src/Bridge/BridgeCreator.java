@@ -50,6 +50,12 @@ public class BridgeCreator {
     }
 
     private void startBridge(String mac) {
+
+        //Check if "activeBridges" already has known TCPBridge object, if it has, stop and start a new one
+        if(activeBridges.containsKey(mac)){
+            stopBridge(mac);
+        }
+
         // Generate a port and start connection to server
         //int localServerPort = generatePort(0);
         int localServerPort = 0;
