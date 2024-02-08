@@ -115,22 +115,8 @@ public class DeviceQueryThread extends Thread {
 
     private String readServerResponse(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-
         return reader.readLine();
-        /*
-        StringBuilder responseBuilder = new StringBuilder();
-        char[] buffer = new char[1024]; // Adjust buffer size as needed
 
-        int bytesRead;
-        while ((bytesRead = reader.read(buffer)) != -1) {
-            responseBuilder.append(buffer, 0, bytesRead);
-            if((int)buffer[bytesRead-1] == 10){
-                break;
-            }
-        }
-        String response = responseBuilder.toString(); ;
-        return response.substring(0, response.length() - 1);
-         */
     }
 
     public void setParamters(String userId, String serverAddress, int serverPort) {
