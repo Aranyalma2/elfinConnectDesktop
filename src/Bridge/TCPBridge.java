@@ -83,6 +83,8 @@ public class TCPBridge {
 
     private String readServerResponse(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        return reader.readLine();
+    /*
         StringBuilder responseBuilder = new StringBuilder();
         char[] buffer = new char[1024]; // Adjust buffer size as needed
 
@@ -95,6 +97,7 @@ public class TCPBridge {
         }
         String response = responseBuilder.toString(); ;
         return response.substring(0, response.length() - 1);
+        */
     }
 
     public void stopBridge(){
