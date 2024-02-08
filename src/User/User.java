@@ -105,14 +105,19 @@ public class User {
             newPortList.add(0);
             for(Device old_device : deviceList){
                 if (Objects.equals(old_device.getMac(), new_device.getMac())) {
-                    newPortList.set(new_devIdx, portList.get(old_devIdx));
+
+                    int oldPort = portList.get(old_devIdx);
+                    //Device was in an active bridge, but no went offline
+                    if(oldPort != 0 && !newDeviceList.get(new_devIdx).getStatus()){
+                        oldPort = 0;
+                    }
+                    newPortList.set(new_devIdx, oldPort);
                     break;
                 }
                 old_devIdx++;
             }
             new_devIdx++;
         }
-
 
         deviceList = newDeviceList;
         portList = newPortList;
