@@ -72,7 +72,7 @@ public class UserPanel extends JPanel {
     }
 
     public void saveUserErrorDialog(String tried) {
-        String message = "Unable to save user changes, user still usable in this session";
+        String message = "Unable to save user changes.";
         JOptionPane.showMessageDialog(MainFrame.getInstance().frame, message, "Unable to save user", JOptionPane.WARNING_MESSAGE);
 
     }
