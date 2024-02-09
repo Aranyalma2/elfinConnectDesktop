@@ -10,6 +10,7 @@ import javax.swing.*;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 
 
 public class MainFrame extends WindowAdapter {
@@ -26,7 +27,12 @@ public class MainFrame extends WindowAdapter {
     public BridgeCreator bridgeCreator;
 
     private MainFrame() {
+
         frame = new JFrame("Elfin Bridge Client " + SWdata.version);
+        BufferedImage image = SWdata.getIcon();
+        if (image != null) {
+            frame.setIconImage(image);
+        }
     }
 
     public static MainFrame getInstance() {
