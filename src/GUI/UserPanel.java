@@ -55,6 +55,7 @@ public class UserPanel extends JPanel {
         public void actionPerformed(ActionEvent e) {
             try {
                 User.updateUser(uuidTEXT.getText(), serverTEXT.getText());
+                MainFrame.getInstance().bridgeCreator.stopAllActiveBridge();
                 status.setConnectionStatus(ServerConnectionStatusPanel.ConnectionStatus.CONNECTING);
             }catch(IllegalArgumentException ie) {
                 //INVALID SERVER ADDRESS INPUT

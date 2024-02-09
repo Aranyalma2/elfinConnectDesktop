@@ -23,7 +23,7 @@ public class MainFrame extends WindowAdapter {
 
     public JFrame frame;
 
-    private BridgeCreator bridgeCreator;
+    public BridgeCreator bridgeCreator;
 
     private MainFrame() {
         frame = new JFrame("Elfin Bridge Client " + SWdata.version);
