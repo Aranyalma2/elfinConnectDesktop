@@ -27,9 +27,10 @@ public class User {
 
     // Constructor
     private User() {
-        loadUser();
-        deviceQueryThread = new DeviceQueryThread(uuid, remoteServerIp, remoteServerPort);
-        deviceQueryThread.start();
+        if(loadUser()) {
+            deviceQueryThread = new DeviceQueryThread(uuid, remoteServerIp, remoteServerPort);
+            deviceQueryThread.start();
+        }
     }
 
     private User(String user, String ip, int port) throws IOException {
@@ -45,7 +46,6 @@ public class User {
     public static User getInstance() {
         if (singelton == null) {
             singelton = new User();
-            loadUser();
         }
         return singelton;
     }
@@ -56,10 +56,16 @@ public class User {
     }
 
     public static String getAddress() {
+
+        if(remoteServerIp.isEmpty() || remoteServerPort == 0){
+            return "";
+        }
         return remoteServerIp + ":" + Integer.toString(remoteServerPort);
     }
 
     public boolean getRemoteServerStatus(){
+        if(deviceQueryThread == null)
+            return false;
         return deviceQueryThread.getConnectionStatus();
     }
 
@@ -138,14 +144,16 @@ public class User {
         }catch(IllegalArgumentException parse) {
             throw new IllegalArgumentException (serverField);
         }
-        deviceQueryThread.interruptSleep();
-        deviceQueryThread.interruptKill();
+        if(deviceQueryThread != null) {
+            deviceQueryThread.interruptSleep();
+            deviceQueryThread.interruptKill();
+        }
 
         singelton = new User(uuidField, ip, port);
     }
 
     // Read User from file
-    private static void loadUser() {
+    private static boolean loadUser() {
         try {
             // Reading the object from a file
             FileInputStream file = new FileInputStream(configFile);
@@ -159,11 +167,15 @@ public class User {
             in.close();
             file.close();
 
+            return true;
+
         } catch (Exception ex) {
             //Load default
 
-            uuid = "unset";
-            remoteServerIp = "unset";
+            uuid = "";
+            remoteServerIp = "";
+            remoteServerPort = 0;
+            return false;
 
         }
     }
