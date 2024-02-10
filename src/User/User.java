@@ -68,6 +68,18 @@ public class User {
             return false;
         return deviceQueryThread.getConnectionStatus();
     }
+    public void stopRemoteServerConnection(){
+        if(deviceQueryThread == null)
+            return;
+        deviceQueryThread.interruptSleep();
+        deviceQueryThread.interruptKill();
+    }
+
+    public void manualReconnectRemoteServer(){
+        if(deviceQueryThread == null)
+            return;
+        deviceQueryThread.interruptSleep();
+    }
 
     // Get deviceList
     public ArrayList<Device> getDevices()  {

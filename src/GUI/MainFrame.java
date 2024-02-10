@@ -125,10 +125,16 @@ public class MainFrame extends WindowAdapter {
         MainFrame.getInstance().serverPanel.setConnectionStatus(ServerConnectionStatusPanel.ConnectionStatus.NOT_CONNECTED);
         bridgeCreator.stopAllActiveBridge();
 
-        String message = "Server connection lost:\n" + User.getAddress() + "\nReconnecting...";
-        String[] buttons = { "Understood" };
+        String message = "Server connection lost:\n" + User.getAddress();
+        String[] buttons = { "Ok", "Reconnect" };
         int selected = JOptionPane.showOptionDialog(frame, message, "Connection error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, buttons, buttons[0]);
-
+        if(selected != -1 && buttons[selected].equals(buttons[0])) {
+            User.getInstance().stopRemoteServerConnection();
+        }
+        if(selected != -1 && buttons[selected].equals(buttons[1])) {
+            MainFrame.getInstance().serverPanel.setConnectionStatus(ServerConnectionStatusPanel.ConnectionStatus.CONNECTING);
+            User.getInstance().manualReconnectRemoteServer();
+        }
     }
 
     public void bridgeErrorDialog(String reason) {
@@ -138,9 +144,11 @@ public class MainFrame extends WindowAdapter {
 
 
     public void windowClosing(WindowEvent e) {
-        int a = JOptionPane.showConfirmDialog(frame, "It will close active connection!\nAre you sure?", "Quit",
+        int a = JOptionPane.showConfirmDialog(frame, "It will close active connections!\nAre you sure?", "Quit",
                 JOptionPane.YES_NO_OPTION);
         if (a == JOptionPane.YES_OPTION) {
+            bridgeCreator.stopAllActiveBridge();
+            User.getInstance().stopRemoteServerConnection();
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         }
     }
