@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class SWdata {
-    public static String version = "v0.2.150 (dev build)";
+    public static String version = "v0.2.151 (dev build)";
 
     public static BufferedImage getIcon(){
         BufferedImage image = null;
