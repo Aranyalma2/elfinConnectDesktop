@@ -1,33 +1,38 @@
 package GUI;
 
+
+import SW.Log;
 import User.User;
 import Bridge.BridgeCreator;
 import SW.SWdata;
 
 import java.awt.*;
-
 import javax.swing.*;
-
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 
-
+/**
+ * The MainFrame class represents the main graphical user interface for the Elfin Bridge Client.
+ * It includes panels for user information, server connection status, and a table of devices.
+ */
 public class MainFrame extends WindowAdapter {
-    private static MainFrame singelton = null;
+    // Singleton instance
+    private static MainFrame singleton = null;
 
+    // Panels for user information and server connection status
     public UserPanel userPanel;
-
     public ServerConnectionStatusPanel serverPanel;
 
+    // Table panel
     public DeviceTable deviceTable;
-
-    public JFrame frame;
-
     public BridgeCreator bridgeCreator;
 
-    private MainFrame() {
+    // Main frame of the application
+    public JFrame frame;
 
+    // Private constructor for singleton pattern
+    private MainFrame() {
         frame = new JFrame("Elfin Bridge Client " + SWdata.version);
         BufferedImage image = SWdata.getIcon();
         if (image != null) {
@@ -35,33 +40,57 @@ public class MainFrame extends WindowAdapter {
         }
     }
 
+    /**
+     * Gets the singleton instance of the MainFrame class.
+     *
+     * @return The MainFrame singleton instance.
+     */
     public static MainFrame getInstance() {
-        if (singelton == null) {
-            singelton = new MainFrame();
+        if (singleton == null) {
+            singleton = new MainFrame();
         }
-        return singelton;
+        return singleton;
     }
 
+    /**
+     * Sets up the frame with default settings.
+     *
+     * @param frame The JFrame to be set up.
+     */
+    private void setupFrame(JFrame frame) {
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        frame.addWindowListener(this);
+        frame.setMinimumSize(new Dimension(800, 600));
+    }
 
-    // paint user
+    /**
+     * Paints user information and server connection status panels to the specified container.
+     *
+     * @param north The container to paint user information and server connection status panels.
+     */
     private void paintUserAndStatus(Container north) {
+        Log.logger.info("Create User & Status panels");
+
         JPanel northPanel = new JPanel();
         northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.LINE_AXIS));
 
         serverPanel = new ServerConnectionStatusPanel();
-
         userPanel = new UserPanel(serverPanel);
         northPanel.add(userPanel);
-
         northPanel.add(serverPanel);
 
         north.add(northPanel, BorderLayout.NORTH);
     }
 
-    // paint table
+    /**
+     * Paints the table of devices and control buttons to the specified container.
+     *
+     * @param south The container to paint the table of devices and control buttons.
+     */
     private void paintTable(Container south) {
-        JLabel tableHeader = new JLabel("Devices");
+        Log.logger.info("Create DeviceTable & Control panels");
 
+        JLabel tableHeader = new JLabel("Devices");
         tableHeader.setFont(new Font("Ariel", Font.BOLD, 20));
 
         JPanel bridgeBtns = new JPanel();
@@ -81,74 +110,81 @@ public class MainFrame extends WindowAdapter {
         south.add(new JScrollPane(deviceTable), BorderLayout.SOUTH);
     }
 
-    private void setupFrame(JFrame frame) {
-        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        frame.addWindowListener(this);
-        // frame.setSize(screen_Width , screen_Height);
-        frame.setMinimumSize(new Dimension(800, 600));
-    }
-
+    /**
+     * Paints user information, server connection status, and the table of devices to the frame.
+     *
+     * @param frame The JFrame to paint the panels.
+     */
     private void paintElementsToFrame(JFrame frame) {
-
         frame.setLayout(new BorderLayout());
         paintUserAndStatus(frame.getContentPane());
         paintTable(frame.getContentPane());
-
     }
 
+    /**
+     * Creates the graphical user interface, sets up the frame, and displays it.
+     */
     public void createGUI() {
+        Log.logger.info("Setup panels");
 
-        // Set up the content pane
         setupFrame(frame);
         paintElementsToFrame(frame);
-        // Display the window
         frame.setVisible(true);
-        // device.setFullScreenWindow(frame);
+
+        Log.logger.info("Rendering panels");
+        
         frame.pack();
     }
 
+    /**
+     * Displays an error dialog for a local server error.
+     *
+     * @param port The port number where the error occurred.
+     */
     public void localServerErrorDialog(String port) {
+        Log.logger.info("Local error dialog shown: [" + port + "]");
         String message = "Unable to create local server:\nlocalhost:" + port;
         JOptionPane.showMessageDialog(frame, message, "Local error", JOptionPane.ERROR_MESSAGE);
     }
 
-    public void authErrorDialog() {
-        String message = "Unable authenticate to server:\n" + User.getUUID();
-        String[] buttons = { "Try Again", "Cancel" };
-        int selected = JOptionPane.showOptionDialog(frame, message, "Server Error", JOptionPane.ERROR_MESSAGE, 0, null, buttons, buttons[0]);
-        if(selected != -1 && buttons[selected].equals(buttons[0])) {
-            //HERE SHOULD START LOGIN AND PINGING THREADS
-        }
-    }
+    /**
+     * Displays an error dialog for a connection timeout.
+     */
     public void timeoutErrorDialog() {
-
         MainFrame.getInstance().serverPanel.setConnectionStatus(ServerConnectionStatusPanel.ConnectionStatus.NOT_CONNECTED);
         bridgeCreator.stopAllActiveBridge();
 
+        Log.logger.info("Connection error dialog shown: [TIMEOUT]");
+
         String message = "Server connection lost:\n" + User.getAddress();
-        String[] buttons = { "Ok", "Reconnect" };
+        String[] buttons = {"Ok", "Reconnect"};
         int selected = JOptionPane.showOptionDialog(frame, message, "Connection error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, buttons, buttons[0]);
-        if(selected != -1 && buttons[selected].equals(buttons[0])) {
-            User.getInstance().stopRemoteServerConnection();
-        }
-        if(selected != -1 && buttons[selected].equals(buttons[1])) {
+        if (selected != -1 && buttons[selected].equals(buttons[1])) {
             MainFrame.getInstance().serverPanel.setConnectionStatus(ServerConnectionStatusPanel.ConnectionStatus.CONNECTING);
             User.getInstance().manualReconnectRemoteServer();
         }
     }
 
+    /**
+     * Displays an error dialog for a bridge-related error.
+     *
+     * @param reason The reason for the bridge error.
+     */
     public void bridgeErrorDialog(String reason) {
+        Log.logger.info("Bridge error dialog shown: [" + reason + "]");
         JOptionPane.showMessageDialog(frame, reason, "Bridge error", JOptionPane.ERROR_MESSAGE);
     }
 
 
-
+    // Handles window closing event
+    @Override
     public void windowClosing(WindowEvent e) {
         int a = JOptionPane.showConfirmDialog(frame, "It will close active connections!\nAre you sure?", "Quit",
                 JOptionPane.YES_NO_OPTION);
         if (a == JOptionPane.YES_OPTION) {
             bridgeCreator.stopAllActiveBridge();
             User.getInstance().stopRemoteServerConnection();
+            Log.logger.info("Closing the app");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         }
     }
