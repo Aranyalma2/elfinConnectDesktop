@@ -30,6 +30,9 @@ public class Log {
             ConsoleHandler consoleHandler = new ConsoleHandler();
             consoleHandler.setFormatter(new CustomOneLineFormatter());
             logger.addHandler(consoleHandler);
+
+            logger.setLevel(Level.ALL);
+
         } catch (Exception ignored) {
         }
     }
