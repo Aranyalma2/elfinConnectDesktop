@@ -33,7 +33,7 @@ public class Log {
             }
 
             // Add FileHandler to log to last.log file
-            FileHandler fileHandler = new FileHandler("last.log");
+            FileHandler fileHandler = new FileHandler("last.log", 1000000, 1);
             fileHandler.setFormatter(new CustomOneLineFormatter());
             logger.addHandler(fileHandler);
 
@@ -42,8 +42,8 @@ public class Log {
             consoleHandler.setFormatter(new CustomOneLineFormatter());
             logger.addHandler(consoleHandler);
 
-            // Set log level to ALL
-            logger.setLevel(Level.ALL);
+            logger.setLevel(Level.FINE);
+
 
         } catch (Exception ignored) {
             // Log any exceptions during logger setup (ignored for simplicity)
