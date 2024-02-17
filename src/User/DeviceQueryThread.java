@@ -1,35 +1,44 @@
 package User;
-import Device.Device;
+
 import GUI.MainFrame;
+import SW.Log;
 
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * The DeviceQueryThread class represents a thread for querying the server to update the device table.
+ */
 public class DeviceQueryThread extends Thread {
     private String userId;
     private String serverAddress;
     private int serverPort;
-    private Socket socket = null;;
+    private Socket socket = null;
     private boolean sleepInterrupted = false;
-
     private boolean killInterrupted = false;
-
     private boolean remoteServerStatus = false;
 
+    /**
+     * Constructs a DeviceQueryThread with the specified user ID, server address, and server port.
+     *
+     * @param userId        The user ID.
+     * @param serverAddress The server address.
+     * @param serverPort    The server port.
+     */
     public DeviceQueryThread(String userId, String serverAddress, int serverPort) {
         this.userId = userId;
         this.serverAddress = serverAddress;
         this.serverPort = serverPort;
     }
 
-
+    /**
+     * The main run method of the thread. Continuously queries the server to update the device table.
+     */
     @Override
     public void run() {
-        System.out.println("USER THREAD STARTED");
+        Log.logger.info("Start server query thread for updating the device table");
         try {
             while (!killInterrupted) {
                 try {
@@ -46,11 +55,11 @@ public class DeviceQueryThread extends Thread {
                         InputStream inputStream = socket.getInputStream();
 
                         // Perform the query task every 30 seconds
+                        Log.logger.fine("Send query to the server");
                         sendQueryToServer(outputStream);
 
                         // Read and log the server's response
                         String response = readServerResponse(inputStream);
-                       // System.out.println("Server Response: " + response);
                         User.getInstance().updateDeviceList(response);
 
                         remoteServerStatus = true;
@@ -58,39 +67,45 @@ public class DeviceQueryThread extends Thread {
                         sleepWithInterruption(30);
                     }
                 } catch (IOException e) {
-                    e.printStackTrace(); // Handle connection-related IO exceptions
+                    Log.logger.warning("Unable to reach the server for data fetch: [" + e.getMessage() + "]");
                     User.getInstance().updateDeviceList("");
                     MainFrame.getInstance().timeoutErrorDialog();
 
                     // If an IOException occurs while establishing a socket, restart the socket
-                    try{
+                    try {
                         remoteServerStatus = false;
                         closeSocket();
                         createSocket();
-                    }catch(IOException ee){
-                        //Try to auto reconnect automatically
+                    } catch (IOException ee) {
+                        // Try to auto-reconnect automatically
                         try {
                             sleepWithInterruption(5);
                         } catch (InterruptedException ex) {
-                            ex.printStackTrace();
+                            Log.logger.warning("Auto-reconnect sleep interrupted: [" + ex.getMessage() + "]");
                         }
                     }
-                } catch (InterruptedException e) {
+                } catch (InterruptedException ex) {
                     remoteServerStatus = false;
-                    e.printStackTrace();
+                    Log.logger.warning("Server query thread interrupted: [" + ex.getMessage() + "]");
                 }
             }
             // Close the socket before the thread exits
             closeSocket();
-        } catch(IOException e){
+        } catch (IOException e) {
             remoteServerStatus = false;
-            e.printStackTrace(); // Handle connection-related IO exceptions
+            Log.logger.warning("Unable to close the existing socket: [" + e.getMessage() + "]");
+            Log.logger.severe("May abandoned sockets still open");
         }
         remoteServerStatus = false;
-        System.out.println("USER THREAD KILLED");
+        Log.logger.info("Stop server query thread");
     }
 
-
+    /**
+     * Sleeps for the specified number of seconds with interruption support.
+     *
+     * @param seconds The number of seconds to sleep.
+     * @throws InterruptedException If the sleep is interrupted.
+     */
     private void sleepWithInterruption(int seconds) throws InterruptedException {
         for (int i = 0; i < seconds && !sleepInterrupted; i++) {
             TimeUnit.SECONDS.sleep(1);
@@ -98,14 +113,26 @@ public class DeviceQueryThread extends Thread {
         sleepInterrupted = false;
     }
 
+    /**
+     * Interrupts the sleep operation.
+     */
     public void interruptSleep() {
         sleepInterrupted = true;
     }
 
+    /**
+     * Interrupts the main loop, terminating the thread.
+     */
     public void interruptKill() {
         killInterrupted = true;
     }
 
+    /**
+     * Sends a query message to the server through the specified output stream.
+     *
+     * @param outputStream The output stream to the server.
+     * @throws IOException If an I/O error occurs.
+     */
     private void sendQueryToServer(OutputStream outputStream) throws IOException {
         String queryMessage = "query;" + userId;
         byte[] messageBytes = queryMessage.getBytes();
@@ -113,30 +140,58 @@ public class DeviceQueryThread extends Thread {
         outputStream.flush();
     }
 
+    /**
+     * Reads the server's response from the specified input stream.
+     *
+     * @param inputStream The input stream from the server.
+     * @return The server's response as a string.
+     * @throws IOException If an I/O error occurs.
+     */
     private String readServerResponse(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         return reader.readLine();
-
     }
 
-    public void setParamters(String userId, String serverAddress, int serverPort) {
+    /**
+     * Sets the parameters of the device query thread.
+     *
+     * @param userId        The user ID.
+     * @param serverAddress The server address.
+     * @param serverPort    The server port.
+     */
+    public void setParameters(String userId, String serverAddress, int serverPort) {
         this.userId = userId;
         this.serverAddress = serverAddress;
         this.serverPort = serverPort;
         interruptSleep();
     }
 
-    private void createSocket() throws IOException{
+    /**
+     * Creates a new socket for the device query thread.
+     *
+     * @throws IOException If an I/O error occurs while creating the socket.
+     */
+    private void createSocket() throws IOException {
         socket = new Socket(serverAddress, serverPort);
     }
 
-    private void closeSocket() throws IOException{
+    /**
+     * Closes the existing socket if it is not already closed.
+     *
+     * @throws IOException If an I/O error occurs while closing the socket.
+     */
+    private void closeSocket() throws IOException {
         if (socket != null && !socket.isClosed()) {
             socket.close();
         }
     }
 
-    public boolean getConnectionStatus(){
+    /**
+     * Gets the connection status of the device query thread.
+     *
+     * @return True if the device query thread is connected to the server, false otherwise.
+     */
+    public boolean getConnectionStatus() {
         return remoteServerStatus;
     }
 }

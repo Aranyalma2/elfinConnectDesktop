@@ -186,6 +186,7 @@ public class TCPBridge {
                     byte[] buffer = new byte[1024];
 
                     while (!Thread.currentThread().isInterrupted() && (bytesRead = clientInput.read(buffer)) != -1) {
+                        Log.logger.finer("Forward content to server. Local server port : (" +this.getLocalPort()+")");
                         // Create a custom header and attach the message
 
                         String message = new String(buffer, 0, bytesRead);
@@ -205,6 +206,7 @@ public class TCPBridge {
                     int bytesRead;
                     byte[] buffer = new byte[1024];
                     while (!Thread.currentThread().isInterrupted() && (bytesRead = remoteInput.read(buffer)) != -1) {
+                        Log.logger.finer("Received content from server. Local server port : (" +this.getLocalPort()+")");
                         clientOutput.write(buffer, 0, bytesRead);
                     }
                 } catch (IOException e) {
