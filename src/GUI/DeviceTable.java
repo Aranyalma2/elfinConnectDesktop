@@ -1,6 +1,7 @@
 package GUI;
 
 import Device.Device;
+import SW.Log;
 import User.User;
 
 import javax.swing.*;
@@ -9,12 +10,25 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
 
+
+/**
+ * The DeviceTable class extends JTable and represents a table displaying information about user's devices.
+ * It includes functionality for refreshing the table with updated device data.
+ * Implements custom cell renderers.
+ */
 public class DeviceTable extends JTable {
 
+    // List of devices
     ArrayList<Device> devices;
+    // List of ports
     ArrayList<Integer> ports;
+    // Table model
     DefaultTableModel model;
 
+    /**
+     * Constructor for the DeviceTable class.
+     * Sets up the table with specified column names, properties, and rendering.
+     */
     public DeviceTable(){
         String[] columnNames = {"No.", "Hostname", "MAC", "Last Seen", "Status", "Running Port"};
 
@@ -43,17 +57,21 @@ public class DeviceTable extends JTable {
             this.getColumnModel().getColumn(i).setCellRenderer(i!=4?new TableCellCenterRenderer():new TableCellColorRenderer(Color.green, Color.red));
         }
 
+        Log.logger.fine("Table object created");
+
         refreshTable();
 
     }
 
-    // Function to refresh the content of the table
+    /**
+     * Function to refresh the content of the table with updated device data.
+     */
     public void refreshTable() {
+        Log.logger.fine("Refreshing device table...");
         // Clear existing rows
         model.setRowCount(0);
 
         devices = User.getInstance().getDevices();
-
         ports = User.getInstance().getPorts();
 
         int deviceNo = 0;
@@ -66,13 +84,24 @@ public class DeviceTable extends JTable {
             model.addRow(rowData);
         }
 
+        Log.logger.fine("Device table refresh successfully.");
+
     }
 }
 
 // -----------COLOR RENDERER CLASS-----------
+/**
+ * TableCellColorRenderer is a custom cell renderer for coloring cells based on device status.
+ */
 class TableCellColorRenderer extends DefaultTableCellRenderer {
     Color color1, color2;
 
+    /**
+     * Constructor for TableCellColorRenderer.
+     *
+     * @param color1 The color for "Online" status.
+     * @param color2 The color for "Offline" status.
+     */
     public TableCellColorRenderer(Color color1, Color color2) {
         super();
         this.color1 = color1;
@@ -80,6 +109,9 @@ class TableCellColorRenderer extends DefaultTableCellRenderer {
         this.setHorizontalAlignment(SwingConstants.CENTER);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
                                                    int row, int column) {
         Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
@@ -91,8 +123,14 @@ class TableCellColorRenderer extends DefaultTableCellRenderer {
     }
 }
 
+/**
+ * TableCellCenterRenderer is a custom cell renderer for centering cell content.
+ */
 class TableCellCenterRenderer extends DefaultTableCellRenderer {
 
+    /**
+     * Constructor for TableCellCenterRenderer.
+     */
     public TableCellCenterRenderer() {
         super();
         this.setHorizontalAlignment(SwingConstants.CENTER);
