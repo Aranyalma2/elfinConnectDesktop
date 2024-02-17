@@ -93,7 +93,7 @@ public class BridgeCreator {
                     localServerPort_Good = true;
                     localServerPort = activeBridges.get(mac).getLocalPort();
 
-                    Log.logger.info("Bridge started for: (" + mac + ") at port: " + localServerPort);
+                    Log.logger.info("Bridge started for: (" + mac + ") at local port: " + localServerPort);
 
                 } catch (RuntimeException runtimeException) {
                     Log.logger.warning(runtimeException.getMessage());
