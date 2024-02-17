@@ -7,7 +7,10 @@ import java.net.Socket;
 import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
 import SW.Log;
-
+/**
+ * The TCPBridge class manages the creation and control of a TCP bridge between a local server and a remote server.
+ * It handles data forwarding between the two servers and includes functionality for starting, stopping, and restarting the bridge.
+ */
 public class TCPBridge {
     //Local server instance
     private ServerSocket localServer = null;
@@ -28,8 +31,19 @@ public class TCPBridge {
     //Connection fabrication message
     String connect = "";
 
-    //Create a local tcp server socket, and restream the data to a remote server socket and add header information to data.
-    //Also establish a tcp and application layer connection to remote server.
+    /**
+     * Constructs a TCPBridge object, creating a local TCP server socket and establishing a connection to a remote server.
+     * Restream the data from localserver to the remote server socket and add header information to data.
+     * Also establish a tcp and application layer connection to remote server.
+     *
+     * @param localServerPort The port number for the local server.
+     * @param remoteHost      The host address of the remote server.
+     * @param remotePort      The port number of the remote server.
+     * @param uuid            The unique identifier for the user.
+     * @param endDeviceMAC    The MAC address of the end device.
+     * @throws RuntimeException If there is an issue during the creation process.
+     * @throws IOException      If there is an issue with I/O operations (Server/Socket related).
+     */
     public TCPBridge(int localServerPort, String remoteHost, int remotePort, String uuid, String endDeviceMAC) throws RuntimeException, IOException {
         //Moc mac is unique id for fill important and unused parts of the header
         String mockMac = "T" +  Integer.toString(localServerPort);
@@ -42,7 +56,7 @@ public class TCPBridge {
 
             localServer = new ServerSocket(localServerPort);
 
-            Log.logger.info("A local server started on: (" + localServerPort + ") port.");
+            Log.logger.info("A local server started on: (" + this.getLocalPort() + ") port.");
 
 
         }catch(IOException e){
@@ -74,11 +88,11 @@ public class TCPBridge {
         Log.logger.info("Server connection established and bridge creation accepted for: ("+ endDeviceMAC +")");
 
         localConnectionHandlerThread = new Thread(() -> {
-            Log.logger.info("Local server is listening at: ("+ localServerPort +")");
+            Log.logger.info("Local server is listening at: ("+ this.getLocalPort() +")");
             while(!Thread.currentThread().isInterrupted()){
                 try {
                     clientSocket = localServer.accept();
-                    Log.logger.info("Local server: ("+ localServerPort +") incoming connection!");
+                    Log.logger.info("Local server: ("+ this.getLocalPort() +") incoming connection!");
                     createConnectionThreads();
 
                 } catch (IOException e) {
@@ -92,15 +106,20 @@ public class TCPBridge {
 
     }
 
+    /**
+     * Retrieves the local port of the local server for this bridge.
+     *
+     * @return The local port number.
+     */
     public int getLocalPort(){
         return localServer.getLocalPort();
     }
 
-    private String readServerResponse(InputStream inputStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        return reader.readLine();
-    }
-
+    /**
+     * Stops the bridge by closing the local and remote sockets.
+     *
+     * @throws RuntimeException If there is an issue closing the sockets.
+     */
     public void stopBridge() throws RuntimeException{
         try {
             Log.logger.info("Try to stop bridge. Local server port : (" +this.getLocalPort()+")");
@@ -112,11 +131,17 @@ public class TCPBridge {
         Log.logger.info("Bridge threads stopped. Local server port : (" +this.getLocalPort()+")");
     }
 
+    /**
+     * Starts the connection threads for data forwarding.
+     */
     private void startConnection(){
         clientToRemoteThread.start();
         remoteToClientThread.start();
     }
 
+    /**
+     * Stops the connection threads.
+     */
     private void stopConnection(){
         if (clientToRemoteThread != null && clientToRemoteThread.getState() == Thread.State.RUNNABLE) {
             clientToRemoteThread.interrupt();
@@ -126,12 +151,21 @@ public class TCPBridge {
         }
     }
 
+    /**
+     * Restarts the connection threads.
+     */
     private void restartConnection(){
+        Log.logger.warning("Restart connection threads. Local server port : (" +this.getLocalPort()+")");
+
         stopConnection();
         startConnection();
     }
 
-
+    /**
+     * Creates and starts the threads for forwarding data between the client and remote server.
+     *
+     * @throws IllegalThreadStateException If there is an issue creating the threads.
+     */
     private void createConnectionThreads() throws IllegalThreadStateException{
 
         //STOP Thread, if somehow running
@@ -160,8 +194,8 @@ public class TCPBridge {
                         remoteOutput.write(combinedMessage.getBytes());
                     }
                 } catch (IOException e) {
+                    Log.logger.warning("Error occurred at client->server thread: [" + e.getMessage() + " Local server port : (" +this.getLocalPort()+")");
                     restartConnection();
-                    throw new IllegalThreadStateException("Remote client->server connection error");
                 }
             });
 
@@ -174,17 +208,30 @@ public class TCPBridge {
                         clientOutput.write(buffer, 0, bytesRead);
                     }
                 } catch (IOException e) {
+                    Log.logger.warning("Error occurred at server->client thread: [" + e.getMessage() + " Local server port : (" +this.getLocalPort()+")");
                     restartConnection();
-                    throw new IllegalThreadStateException("Remote server->client connection error");
+
                 }
             });
 
             startConnection();
 
         }catch(IOException e){
-            e.printStackTrace();
+            Log.logger.warning("Error occurred at bridge creation process: [" + e.getMessage() + " Local server port : (" +this.getLocalPort()+")");
             stopConnection();
         }
+    }
+
+    /**
+     * Reads the server response from the input stream.
+     *
+     * @param inputStream The input stream from which to read the response.
+     * @return The server response as a string.
+     * @throws IOException If there is an issue reading from the input stream.
+     */
+    private String readServerResponse(InputStream inputStream) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        return reader.readLine();
     }
 
 
