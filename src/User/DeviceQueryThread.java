@@ -145,9 +145,7 @@ public class DeviceQueryThread extends Thread {
      * @throws IOException If an I/O error occurs while creating the socket.
      */
     private void createSocket() throws IOException {
-        System.out.println("socket");
         socket = SecureSocketBuilder.getNewSocket();
-        System.out.println("socket");
     }
 
     /**
