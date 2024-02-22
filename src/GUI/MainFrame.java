@@ -158,11 +158,23 @@ public class MainFrame extends WindowAdapter {
 
         String message = "Server connection lost:\n" + User.getAddress();
         String[] buttons = {"Ok", "Reconnect"};
-        int selected = JOptionPane.showOptionDialog(frame, message, "Connection error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, buttons, buttons[0]);
-        if (selected != -1 && buttons[selected].equals(buttons[1])) {
-            MainFrame.getInstance().serverPanel.setConnectionStatus(ServerConnectionStatusPanel.ConnectionStatus.CONNECTING);
-            User.getInstance().manualReconnectRemoteServer();
-        }
+        int selected = JOptionPane.showOptionDialog(frame, message, "Connection error: timeout", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, buttons, buttons[0]);
+        serverReconnectionDialogChoices(buttons, selected);
+    }
+
+    /**
+     * Displays an error dialog for a connection error, unable to connect.
+     */
+    public void connectErrorDialog() {
+        MainFrame.getInstance().serverPanel.setConnectionStatus(ServerConnectionStatusPanel.ConnectionStatus.NOT_CONNECTED);
+        bridgeCreator.stopAllActiveBridge();
+
+        Log.logger.info("Connection error dialog shown: [Unable connect]");
+
+        String message = "Unable to connect server:\n" + User.getAddress();
+        String[] buttons = {"Ok", "Retry"};
+        int selected = JOptionPane.showOptionDialog(frame, message, "Connection error: unreachable", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, buttons, buttons[0]);
+        serverReconnectionDialogChoices(buttons, selected);
     }
 
     /**
@@ -186,6 +198,23 @@ public class MainFrame extends WindowAdapter {
             User.getInstance().stopRemoteServerConnection();
             Log.logger.info("Closing the app");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        }
+    }
+
+    /**
+     * How to handle user selected actions in error dialogs
+     *
+     * @param buttons The list of buttons
+     * @param selected Selected button
+     */
+    private void serverReconnectionDialogChoices(String[] buttons, int selected) {
+        if (selected != -1 && buttons[selected].equals(buttons[1])) {
+            MainFrame.getInstance().serverPanel.setConnectionStatus(ServerConnectionStatusPanel.ConnectionStatus.CONNECTING);
+            User.getInstance().restartTerminatedRemoteServerConnection();
+        }
+        if (selected != -1 && buttons[selected].equals(buttons[0])) {
+            MainFrame.getInstance().serverPanel.setConnectionStatus(ServerConnectionStatusPanel.ConnectionStatus.NOT_CONNECTED);
+            User.getInstance().stopRemoteServerConnection();
         }
     }
 }

@@ -120,6 +120,19 @@ public class User {
     }
 
     /**
+     * Start the remote server connection work only if deviceQueryThread terminated
+     */
+    public void restartTerminatedRemoteServerConnection() {
+        if (deviceQueryThread == null)
+            return;
+        if(deviceQueryThread.getState() != Thread.State.TERMINATED){
+            stopRemoteServerConnection();
+        }
+        deviceQueryThread = new DeviceQueryThread(uuid, remoteServerIp, remoteServerPort);
+        deviceQueryThread.start();
+    }
+
+    /**
      * Stops the remote server connection by interrupting the sleep and kill the thread.
      */
     public void stopRemoteServerConnection() {
@@ -132,7 +145,7 @@ public class User {
     /**
      * Manually triggers a reconnect to the remote server by interrupting the sleep.
      */
-    public void manualReconnectRemoteServer() {
+    public void manualFetchRemoteServer() {
         if (deviceQueryThread == null)
             return;
         deviceQueryThread.interruptSleep();

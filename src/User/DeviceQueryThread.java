@@ -40,13 +40,19 @@ public class DeviceQueryThread extends Thread {
     public void run() {
         Log.logger.info("Start server query thread for updating the device table");
         try {
+            if (socket == null || !socket.getInetAddress().getHostAddress().equals(serverAddress) || socket.getPort() != serverPort) {
+                // Close existing socket (if any) and create a new one
+                try {
+                    createSocket();
+                } catch (IOException e) {
+                    remoteServerStatus = false;
+                    MainFrame.getInstance().connectErrorDialog();
+                    Log.logger.warning("Unable to create the socket: [" + e.getMessage() + "]");
+
+                }
+            }
             while (!killInterrupted) {
                 try {
-                    if (socket == null || !socket.getInetAddress().getHostAddress().equals(serverAddress) || socket.getPort() != serverPort) {
-                        // Close existing socket (if any) and create a new one
-                        closeSocket();
-                        createSocket();
-                    }
 
                     // Set the timeout for socket operations (adjust as needed)
                     if (socket != null) {
@@ -68,22 +74,9 @@ public class DeviceQueryThread extends Thread {
                     }
                 } catch (IOException e) {
                     Log.logger.warning("Unable to reach the server for data fetch: [" + e.getMessage() + "]");
-                    User.getInstance().updateDeviceList("");
                     MainFrame.getInstance().timeoutErrorDialog();
+                    break;
 
-                    // If an IOException occurs while establishing a socket, restart the socket
-                    try {
-                        remoteServerStatus = false;
-                        closeSocket();
-                        createSocket();
-                    } catch (IOException ee) {
-                        // Try to auto-reconnect automatically
-                        try {
-                            sleepWithInterruption(5);
-                        } catch (InterruptedException ex) {
-                            Log.logger.warning("Auto-reconnect sleep interrupted: [" + ex.getMessage() + "]");
-                        }
-                    }
                 } catch (InterruptedException ex) {
                     remoteServerStatus = false;
                     Log.logger.warning("Server query thread interrupted: [" + ex.getMessage() + "]");
@@ -92,11 +85,13 @@ public class DeviceQueryThread extends Thread {
             // Close the socket before the thread exits
             closeSocket();
         } catch (IOException e) {
-            remoteServerStatus = false;
+            MainFrame.getInstance().connectErrorDialog();
             Log.logger.warning("Unable to close the existing socket: [" + e.getMessage() + "]");
             Log.logger.severe("May abandoned sockets still open");
+
         }
         remoteServerStatus = false;
+        User.getInstance().updateDeviceList("");
         Log.logger.info("Stop server query thread");
     }
 
