@@ -213,7 +213,7 @@ public class BridgeCreator {
             possiblePort = Collections.max(ports);
         }
 
-        if (possiblePort <= 65564) {
+        if (possiblePort <= 65534) {
             return possiblePort + 1;
         } else {
             return Collections.min(ports) - 1;
