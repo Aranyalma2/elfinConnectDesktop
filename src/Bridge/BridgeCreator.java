@@ -89,7 +89,7 @@ public class BridgeCreator {
             boolean localServerPort_Good = false;
             while (!localServerPort_Good) {
                 try {
-                    activeBridges.put(mac, new TCPBridge(localServerPort, User.remoteServerIp, User.remoteServerPort, User.getUUID(), mac));
+                    activeBridges.put(mac, new TCPBridge(localServerPort, User.getUUID(), mac));
                     localServerPort_Good = true;
                     localServerPort = activeBridges.get(mac).getLocalPort();
 

@@ -1,5 +1,6 @@
 package Bridge;
 
+import SW.SecureSocketBuilder;
 import User.DataFromJson;
 
 import java.io.*;
@@ -7,6 +8,9 @@ import java.net.Socket;
 import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
 import SW.Log;
+
+import javax.net.ssl.SSLSocket;
+
 /**
  * The TCPBridge class manages the creation and control of a TCP bridge between a local server and a remote server.
  * It handles data forwarding between the two servers and includes functionality for starting, stopping, and restarting the bridge.
@@ -17,7 +21,7 @@ public class TCPBridge {
     //Local server`s last incommoded client`s socket
     private Socket clientSocket = null;
     //Remote server connection socket
-    private Socket remoteSocket = null;
+    private SSLSocket remoteSocket = null;
     //Handle all incoming tcp client connection to Local server instance
     private Thread localConnectionHandlerThread = null;
 
@@ -37,14 +41,12 @@ public class TCPBridge {
      * Also establish a tcp and application layer connection to remote server.
      *
      * @param localServerPort The port number for the local server.
-     * @param remoteHost      The host address of the remote server.
-     * @param remotePort      The port number of the remote server.
      * @param uuid            The unique identifier for the user.
      * @param endDeviceMAC    The MAC address of the end device.
      * @throws RuntimeException If there is an issue during the creation process.
      * @throws IOException      If there is an issue with I/O operations (Server/Socket related).
      */
-    public TCPBridge(int localServerPort, String remoteHost, int remotePort, String uuid, String endDeviceMAC) throws RuntimeException, IOException {
+    public TCPBridge(int localServerPort, String uuid, String endDeviceMAC) throws RuntimeException, IOException {
         //Moc mac is unique id for fill important and unused parts of the header
         String mockMac = "T" +  Integer.toString(localServerPort);
         //"data;uuid;mockMac;mockMac;1" => send a data packet to server; user-id; 2x mockID (need while connection active); "1" represented it is a virtual device
@@ -65,18 +67,18 @@ public class TCPBridge {
 
         boolean connectionStatus = false;
         try{
-            Log.logger.info("Attempt to connect remote server at: (" + remoteHost + ":" + remotePort +")");
-            remoteSocket = new Socket(remoteHost, remotePort);
+            Log.logger.info("Attempt to connect remote server at: (" + SecureSocketBuilder.getHost() + ":" + SecureSocketBuilder.getPort() +")");
+            remoteSocket = SecureSocketBuilder.getNewSocket();
             remoteSocket.setSoTimeout(5000);
             remoteSocket.getOutputStream().write(connect.getBytes());
-            Log.logger.info("Sent connection request to remote server at: (" + remoteHost + ":" + remotePort +")");
+            Log.logger.info("Sent connection request to remote server at: (" + SecureSocketBuilder.getHost() + ":" + SecureSocketBuilder.getPort() +")");
 
             connectionStatus = DataFromJson.convertJsonToStatus(readServerResponse(remoteSocket.getInputStream()));
             remoteSocket.setSoTimeout(1800000);
         }catch(IOException e){
 
             localServer.close();
-            throw new IOException("Unable to connect remote server at: (" + remoteHost + ":" + remotePort +")");
+            throw new IOException("Unable to connect remote server at: (" + SecureSocketBuilder.getHost() + ":" + SecureSocketBuilder.getPort() +")");
         }
 
         //Server rejected bridge creation request
