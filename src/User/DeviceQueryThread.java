@@ -2,9 +2,10 @@ package User;
 
 import GUI.MainFrame;
 import SW.Log;
+import SW.SecureSocketBuilder;
 
+import javax.net.ssl.SSLSocket;
 import java.io.*;
-import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
@@ -12,25 +13,19 @@ import java.util.concurrent.TimeUnit;
  * The DeviceQueryThread class represents a thread for querying the server to update the device table.
  */
 public class DeviceQueryThread extends Thread {
-    private String userId;
-    private String serverAddress;
-    private int serverPort;
-    private Socket socket = null;
+    private final String userId;
+    private SSLSocket socket = null;
     private boolean sleepInterrupted = false;
     private boolean killInterrupted = false;
     private boolean remoteServerStatus = false;
 
     /**
-     * Constructs a DeviceQueryThread with the specified user ID, server address, and server port.
+     * Constructs a DeviceQueryThread with the specified user ID.
      *
      * @param userId        The user ID.
-     * @param serverAddress The server address.
-     * @param serverPort    The server port.
      */
-    public DeviceQueryThread(String userId, String serverAddress, int serverPort) {
+    public DeviceQueryThread(String userId) {
         this.userId = userId;
-        this.serverAddress = serverAddress;
-        this.serverPort = serverPort;
     }
 
     /**
@@ -40,40 +35,37 @@ public class DeviceQueryThread extends Thread {
     public void run() {
         Log.logger.info("Start server query thread for updating the device table");
         try {
-            if (socket == null || !socket.getInetAddress().getHostAddress().equals(serverAddress) || socket.getPort() != serverPort) {
-                // Close existing socket (if any) and create a new one
-                try {
-                    createSocket();
-                } catch (IOException e) {
-                    remoteServerStatus = false;
-                    MainFrame.getInstance().connectErrorDialog();
-                    Log.logger.warning("Unable to create the socket: [" + e.getMessage() + "]");
-
-                }
+            try {
+                createSocket();
+            } catch (IOException e) {
+                remoteServerStatus = false;
+                MainFrame.getInstance().connectErrorDialog();
+                Log.logger.warning("Unable to create the socket: [" + e.getMessage() + "]");
             }
-            while (!killInterrupted) {
+            while (socket != null && !killInterrupted) {
                 try {
 
                     // Set the timeout for socket operations (adjust as needed)
-                    if (socket != null) {
-                        socket.setSoTimeout(5000);
-                        OutputStream outputStream = socket.getOutputStream();
-                        InputStream inputStream = socket.getInputStream();
+                    socket.setSoTimeout(5000);
+                    OutputStream outputStream = socket.getOutputStream();
+                    InputStream inputStream = socket.getInputStream();
 
-                        // Perform the query task every 30 seconds
-                        Log.logger.fine("Send query to the server");
-                        sendQueryToServer(outputStream);
+                    // Perform the query task every 30 seconds
+                    Log.logger.fine("Send query to the server");
+                    sendQueryToServer(outputStream);
 
-                        // Read and log the server's response
-                        String response = readServerResponse(inputStream);
-                        User.getInstance().updateDeviceList(response);
+                    // Read and log the server's response
+                    String response = readServerResponse(inputStream);
+                    User.getInstance().updateDeviceList(response);
 
-                        remoteServerStatus = true;
+                    remoteServerStatus = true;
 
-                        sleepWithInterruption(30);
-                    }
+                    sleepWithInterruption(30);
+
                 } catch (IOException e) {
+                    remoteServerStatus = false;
                     Log.logger.warning("Unable to reach the server for data fetch: [" + e.getMessage() + "]");
+                    User.getInstance().updateDeviceList("");
                     MainFrame.getInstance().timeoutErrorDialog();
                     break;
 
@@ -85,13 +77,13 @@ public class DeviceQueryThread extends Thread {
             // Close the socket before the thread exits
             closeSocket();
         } catch (IOException e) {
+            remoteServerStatus = false;
+            User.getInstance().updateDeviceList("");
             MainFrame.getInstance().connectErrorDialog();
             Log.logger.warning("Unable to close the existing socket: [" + e.getMessage() + "]");
             Log.logger.severe("May abandoned sockets still open");
 
         }
-        remoteServerStatus = false;
-        User.getInstance().updateDeviceList("");
         Log.logger.info("Stop server query thread");
     }
 
@@ -148,26 +140,14 @@ public class DeviceQueryThread extends Thread {
     }
 
     /**
-     * Sets the parameters of the device query thread.
-     *
-     * @param userId        The user ID.
-     * @param serverAddress The server address.
-     * @param serverPort    The server port.
-     */
-    public void setParameters(String userId, String serverAddress, int serverPort) {
-        this.userId = userId;
-        this.serverAddress = serverAddress;
-        this.serverPort = serverPort;
-        interruptSleep();
-    }
-
-    /**
      * Creates a new socket for the device query thread.
      *
      * @throws IOException If an I/O error occurs while creating the socket.
      */
     private void createSocket() throws IOException {
-        socket = new Socket(serverAddress, serverPort);
+        System.out.println("socket");
+        socket = SecureSocketBuilder.getNewSocket();
+        System.out.println("socket");
     }
 
     /**

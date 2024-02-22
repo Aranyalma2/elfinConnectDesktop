@@ -2,6 +2,7 @@ package User;
 
 import Device.Device;
 import SW.Log;
+import SW.SecureSocketBuilder;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -42,7 +43,8 @@ public class User {
         // Attempt to load user data from the configuration file
         if (loadUser()) {
             // If successful, initialize and start the device query thread
-            deviceQueryThread = new DeviceQueryThread(uuid, remoteServerIp, remoteServerPort);
+            SecureSocketBuilder.setServer(remoteServerIp, remoteServerPort);
+            deviceQueryThread = new DeviceQueryThread(uuid);
             deviceQueryThread.start();
         }
     }
@@ -62,10 +64,13 @@ public class User {
         uuid = user;
         remoteServerIp = ip;
         remoteServerPort = port;
+        SecureSocketBuilder.setServer(remoteServerIp, remoteServerPort);
         // Save the user data to the configuration file
         saveUser();
+        //Clear device list
+        updateDeviceList("");
         // Initialize and start the device query thread
-        deviceQueryThread = new DeviceQueryThread(uuid, remoteServerIp, remoteServerPort);
+        deviceQueryThread = new DeviceQueryThread(uuid);
         deviceQueryThread.start();
     }
 
@@ -128,7 +133,7 @@ public class User {
         if(deviceQueryThread.getState() != Thread.State.TERMINATED){
             stopRemoteServerConnection();
         }
-        deviceQueryThread = new DeviceQueryThread(uuid, remoteServerIp, remoteServerPort);
+        deviceQueryThread = new DeviceQueryThread(uuid);
         deviceQueryThread.start();
     }
 
