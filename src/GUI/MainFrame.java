@@ -133,6 +133,8 @@ public class MainFrame extends WindowAdapter {
 
         Log.logger.info("Rendering panels");
 
+        frame.setLocationRelativeTo(null);
+
         frame.pack();
     }
 
