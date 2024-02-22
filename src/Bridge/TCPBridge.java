@@ -82,7 +82,7 @@ public class TCPBridge {
         //Server rejected bridge creation request
         if(!connectionStatus){
             localServer.close();
-            throw new IOException("Server refused the bridge creation request: " + connectionStatus);
+            throw new IOException("Server refused the bridge creation request!");
         }
 
         Log.logger.info("Server connection established and bridge creation accepted for: ("+ endDeviceMAC +")");
