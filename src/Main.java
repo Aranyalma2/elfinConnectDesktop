@@ -38,7 +38,7 @@ public class Main {
             }
 
             try {
-                Thread.sleep(10000);
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
                 Log.logger.warning("Main sleep unexpectedly interrupted from outside, close application.");
                 Log.logger.severe(e.getMessage());
