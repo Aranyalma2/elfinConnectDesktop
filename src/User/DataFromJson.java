@@ -33,9 +33,9 @@ public class DataFromJson {
             for (int i = 0; i < arrayJson.length(); i++) {
                 deviceArrayList.add(new Device(arrayJson.getJSONObject(i)));
             }
-        } catch (JSONException jsonException) {
+        } catch (NullPointerException | JSONException exception) {
             // Log the error and return an empty list in case of JSON parsing error
-            Log.logger.warning("Error in JSON parse, unable to process device json: ["+jsonException.getMessage()+"]");
+            Log.logger.warning("Error in JSON parse, unable to process device json: ["+exception.getMessage()+"]");
             return new ArrayList<>();
         }
 
@@ -55,9 +55,9 @@ public class DataFromJson {
 
             // Check if the status in the JSONObject is "success"
             return jsonObject.getString("status").equals("success");
-        } catch (JSONException jsonException) {
+        } catch (NullPointerException | JSONException exception) {
             // Log and return false in case of JSON parsing error
-            Log.logger.warning("Error in JSON parse, unable to process status json: ["+jsonException.getMessage()+"]");
+            Log.logger.warning("Error in JSON parse, unable to process status json: ["+exception.getMessage()+"]");
             return false;
         }
     }
