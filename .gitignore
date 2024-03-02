@@ -1,6 +1,7 @@
 .idea/
-out/*
-!out/artifacts/build/
+out/artifacts/releases/
+out/artifacts/elfinConnectDesktop_jar/
+out/production/
 
 user.conf
 last.log

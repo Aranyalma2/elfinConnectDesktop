@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch4jConfig>
+  <dontWrapJar>true</dontWrapJar>
+  <headerType>gui</headerType>
+  <jar>elfinConnectDesktop.jar</jar>
+  <outfile>D:\Munka\elfinConnectDesktop\out\artifacts\build\Elfin Connect Desktop\Elfin Connect Desktop.exe</outfile>
+  <errTitle></errTitle>
+  <cmdLine></cmdLine>
+  <chdir>.</chdir>
+  <priority>normal</priority>
+  <downloadUrl>https://adoptium.net/en-GB/temurin/releases/</downloadUrl>
+  <supportUrl></supportUrl>
+  <stayAlive>false</stayAlive>
+  <restartOnCrash>false</restartOnCrash>
+  <manifest></manifest>
+  <icon>D:\Munka\elfinConnectDesktop\out\artifacts\build\icon.ico</icon>
+  <jre>
+    <path>java/bin</path>
+    <requiresJdk>false</requiresJdk>
+    <requires64Bit>false</requires64Bit>
+    <minVersion>17.0.10</minVersion>
+    <maxVersion></maxVersion>
+  </jre>
+  <versionInfo>
+    <fileVersion>1.0.0.0</fileVersion>
+    <txtFileVersion>stable-build</txtFileVersion>
+    <fileDescription>Elfin Connect desktop client application.</fileDescription>
+    <copyright>MIT</copyright>
+    <productVersion>1.0.0.0</productVersion>
+    <txtProductVersion>stable-build</txtProductVersion>
+    <productName>Elfin Connect Desktop</productName>
+    <companyName>Balint Nemeth</companyName>
+    <internalName>Elfin Connect Desktop client</internalName>
+    <originalFilename>Elfin Connect Desktop.exe</originalFilename>
+    <trademarks></trademarks>
+    <language>ENGLISH_US</language>
+  </versionInfo>
+</launch4jConfig>
