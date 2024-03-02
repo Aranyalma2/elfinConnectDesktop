@@ -2,13 +2,13 @@
 <p align="center">
 <img alt="Github top language" src="https://img.shields.io/badge/version-0.2.171-blue">
 
-<img alt="Github top language" src="https://img.shields.io/github/languages/top/Aranyalma2/elfinconnectdesktop?color=8f3d3d">
+<img alt="Github top language" src="https://img.shields.io/github/languages/top/Aranyalma2/elfinConnectDesktop?color=8f3d3d">
 
 <img alt="Codacy qualty" src="https://img.shields.io/codacy/grade/f59d9e43d6814dae960c99c2d8a3a564" />
 
 <img alt="Repository size" src="https://img.shields.io/github/repo-size/Aranyalma2/elfinConnectdesktop?color=532BEAF">
 
-<img alt="License" src="https://img.shields.io/github/license/Aranyalma2/elfinconnectdesktop?color=56BEB8">
+<img alt="License" src="https://img.shields.io/github/license/Aranyalma2/elfinConnectDesktop?color=56BEB8">
 
 </p>
 
