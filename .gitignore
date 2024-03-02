@@ -1,5 +1,6 @@
 .idea/
-out/
+out/*
+!out/artifacts/build/
 
 user.conf
 last.log
