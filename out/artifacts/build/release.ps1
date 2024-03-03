@@ -8,6 +8,11 @@ if (-not (Test-Path -Path $work_dir)) {
     Write-Host "Created components folder."
 }
 
+if (-not (Test-Path -Path "..\releases")) {
+    New-Item -ItemType Directory -Path "..\releases" | Out-Null
+    Write-Host "Created output folder."
+}
+
 
 # Check if the java folder exists
 if (-not (Test-Path $java_folder)) {
