@@ -21,7 +21,7 @@ public class ServerConnectionStatusPanel extends JPanel {
         setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
 
         // Create and add components
-        statusLabel = new JLabel("Not connected");
+        statusLabel = new JLabel("Disconnected");
         statusLabel.setFont(new Font("Ariel", Font.BOLD, 20));
         statusLabel.setForeground(Color.RED);
 
@@ -49,7 +49,7 @@ public class ServerConnectionStatusPanel extends JPanel {
                 statusLabel.setForeground(Color.BLUE);
                 break;
             case NOT_CONNECTED:
-                statusLabel.setText("Not connected");
+                statusLabel.setText("Disconnected");
                 statusLabel.setForeground(Color.RED);
                 break;
         }
