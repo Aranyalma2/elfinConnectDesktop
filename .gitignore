@@ -1,6 +1,6 @@
 .idea/
 out/artifacts/releases/
-out/artifacts/elfinConnectDesktop_jar/
+out/artifacts/elfinConnectDesktop/
 out/production/
 
 user.conf

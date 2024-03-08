@@ -39,8 +39,8 @@ if (-not (Test-Path $java_folder)) {
 }
 
 # Check if files were copied
-$artifactsFiles = Get-ChildItem -Path ../elfinConnectDesktop_jar
-Copy-Item -Path ../elfinConnectDesktop_jar/* -Destination $work_dir
+$artifactsFiles = Get-ChildItem -Path ../elfinConnectDesktop
+Copy-Item -Path ../elfinConnectDesktop/* -Destination $work_dir
 
 if ($artifactsFiles.Count -gt 0){
 	Write-Host "Artifacts files copied."

@@ -34,6 +34,23 @@
 * :bulb: Shows groups
 * :bulb: Fix down a port for a device, and best effort use it.
 
+## Build JAR
+    Build artifact file with IntelliJ:
+    .idea/artifacts/elfinConnectDesktop.xml
+
+```xml
+<component name="ArtifactManager">
+    <artifact type="jar" name="elfinConnectDesktop">
+        <output-path>$PROJECT_DIR$/out/artifacts/elfinConnectDesktop</output-path>
+        <root id="archive" name="elfinConnectDesktop.jar">
+        <element id="module-output" name="elfinConnectDesktop" />
+        <element id="extracted-dir" path="$PROJECT_DIR$/lib/java-json.jar" path-in-jar="/" />
+        </root>
+    </artifact>
+</component>
+```
+
+
 ## :memo: License
 
 This project is under license from Apache 2.0. For more details, see the [LICENSE](LICENSE.md) file.
