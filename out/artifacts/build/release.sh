@@ -36,8 +36,8 @@ else
 fi
 
 # Check if files were copied
-artifactsFiles=(../elfinConnectDesktop_jar/*)
-cp -r ../elfinConnectDesktop_jar/* "$work_dir"
+artifactsFiles=(../elfinConnectDesktop/*)
+cp -r ../elfinConnectDesktop/* "$work_dir"
 
 if [ ${#artifactsFiles[@]} -gt 0 ]; then
     echo "Artifacts files copied."
