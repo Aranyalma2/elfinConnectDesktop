@@ -174,12 +174,6 @@ public class TCPBridge {
         stopConnection();
 
         // Create input and output streams for client and remote connections
-        try {
-            InputStream clientInput = clientSocket.getInputStream();
-            OutputStream clientOutput = clientSocket.getOutputStream();
-            InputStream remoteInput = remoteSocket.getInputStream();
-            OutputStream remoteOutput = remoteSocket.getOutputStream();
-
 
             // Start a thread to forward data from client to remote server
             clientToRemoteThread = new Thread(() -> {
@@ -187,14 +181,14 @@ public class TCPBridge {
                     int bytesRead;
                     byte[] buffer = new byte[1024];
 
-                    while (!Thread.currentThread().isInterrupted() && (bytesRead = clientInput.read(buffer)) != -1) {
+                    while (!Thread.currentThread().isInterrupted() && (bytesRead = clientSocket.getInputStream().read(buffer)) != -1) {
                         Log.logger.finer("Forward content to server. Local server port : (" +this.getLocalPort()+")");
                         // Create a custom header and attach the message
 
                         String message = new String(buffer, 0, bytesRead);
                         String combinedMessage = header + message;
 
-                        remoteOutput.write(combinedMessage.getBytes());
+                        remoteSocket.getOutputStream().write(combinedMessage.getBytes());
                     }
                 } catch (IOException e) {
                     Log.logger.warning("Error occurred at client->server thread: [" + e.getMessage() + " Local server port : (" +this.getLocalPort()+")");
@@ -207,9 +201,9 @@ public class TCPBridge {
                 try {
                     int bytesRead;
                     byte[] buffer = new byte[1024];
-                    while (!Thread.currentThread().isInterrupted() && (bytesRead = remoteInput.read(buffer)) != -1) {
+                    while (!Thread.currentThread().isInterrupted() && (bytesRead = remoteSocket.getInputStream().read(buffer)) != -1) {
                         Log.logger.finer("Received content from server. Local server port : (" +this.getLocalPort()+")");
-                        clientOutput.write(buffer, 0, bytesRead);
+                        clientSocket.getOutputStream().write(buffer, 0, bytesRead);
                     }
                 } catch (IOException e) {
                     Log.logger.warning("Error occurred at server->client thread: [" + e.getMessage() + " Local server port : (" +this.getLocalPort()+")");
@@ -220,10 +214,6 @@ public class TCPBridge {
 
             startConnection();
 
-        }catch(IOException e){
-            Log.logger.warning("Error occurred at bridge creation process: [" + e.getMessage() + " Local server port : (" +this.getLocalPort()+")");
-            stopConnection();
-        }
     }
 
     /**
