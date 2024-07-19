@@ -32,6 +32,8 @@ public class Log {
                 }
             }
 
+            logger.setLevel(Level.ALL);
+
             // Add FileHandler to log to last.log file
             FileHandler fileHandler = new FileHandler("last.log", 1000000, 1);
             fileHandler.setFormatter(new CustomOneLineFormatter());
@@ -41,8 +43,6 @@ public class Log {
             ConsoleHandler consoleHandler = new ConsoleHandler();
             consoleHandler.setFormatter(new CustomOneLineFormatter());
             logger.addHandler(consoleHandler);
-
-            logger.setLevel(Level.FINE);
 
 
         } catch (Exception ignored) {

@@ -4,8 +4,8 @@ import GUI.MainFrame;
 import SW.Log;
 import SW.SecureSocketBuilder;
 
-import javax.net.ssl.SSLSocket;
 import java.io.*;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class DeviceQueryThread extends Thread {
     private final String userId;
-    private SSLSocket socket = null;
+    private Socket socket = null;
     private boolean sleepInterrupted = false;
     private boolean killInterrupted = false;
     private boolean remoteServerStatus = false;

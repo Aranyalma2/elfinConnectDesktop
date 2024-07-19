@@ -13,7 +13,7 @@ public class SWdata {
     /**
      * The version information for the application.
      */
-    public static String version = "v0.2.172 (alpha)";
+    public static String version = "v0.2.173 (alpha)";
 
     /**
      * Retrieves the application icon as a BufferedImage.

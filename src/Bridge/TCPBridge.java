@@ -21,7 +21,7 @@ public class TCPBridge {
     //Local server`s last incommoded client`s socket
     private Socket clientSocket = null;
     //Remote server connection socket
-    private SSLSocket remoteSocket = null;
+    private Socket remoteSocket = null;
     //Handle all incoming tcp client connection to Local server instance
     private Thread localConnectionHandlerThread = null;
 
@@ -179,7 +179,7 @@ public class TCPBridge {
             clientToRemoteThread = new Thread(() -> {
                 try {
                     int bytesRead;
-                    byte[] buffer = new byte[1024];
+                    byte[] buffer = new byte[4096];
 
                     while (!Thread.currentThread().isInterrupted() && (bytesRead = clientSocket.getInputStream().read(buffer)) != -1) {
                         Log.logger.finer("Forward content to server. Local server port : (" +this.getLocalPort()+")");
@@ -200,7 +200,7 @@ public class TCPBridge {
             remoteToClientThread = new Thread(() -> {
                 try {
                     int bytesRead;
-                    byte[] buffer = new byte[1024];
+                    byte[] buffer = new byte[4096];
                     while (!Thread.currentThread().isInterrupted() && (bytesRead = remoteSocket.getInputStream().read(buffer)) != -1) {
                         Log.logger.finer("Received content from server. Local server port : (" +this.getLocalPort()+")");
                         clientSocket.getOutputStream().write(buffer, 0, bytesRead);
