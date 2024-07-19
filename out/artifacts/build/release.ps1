@@ -1,7 +1,21 @@
-$destinationZip = "..\releases\latest.zip"
-$work_dir = "Elfin Connect Desktop"
+param (
+    [string]$version
+)
+
+if (-not $version) {
+    $version = Read-Host -Prompt "Please enter the version number"
+}
+
+if (-not $version) {
+    Write-Host "Version number is required. Exiting script."
+    Exit
+}
+
+$work_dir = "Elfin Connect Desktop $version"
 $java_folder = Join-Path $work_dir "java"
+$destinationZip = "..\releases\Elfin_Connect_Desktop_$version.zip"
 $download_link = "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2%2B13/OpenJDK21U-jre_x64_windows_hotspot_21.0.2_13.zip"
+
 
 if (-not (Test-Path -Path $work_dir)) {
     New-Item -ItemType Directory -Path $work_dir | Out-Null
