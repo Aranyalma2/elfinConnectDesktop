@@ -95,7 +95,17 @@ public class TCPBridge {
                 try {
                     clientSocket = localServer.accept();
                     Log.logger.info("Local server: ("+ this.getLocalPort() +") incoming connection!");
-                    createConnectionThreads();
+
+                    try {
+                        System.out.println(clientToRemoteThread.getState());
+                        System.out.println(remoteToClientThread.getState());
+                    }catch (Exception e){}
+
+                    if(clientToRemoteThread == null || remoteToClientThread == null || !clientToRemoteThread.isAlive() || !remoteToClientThread.isAlive()){
+
+                        Log.logger.info("Create new bridge: ("+ this.getLocalPort() +") !");
+                        createConnectionThreads();
+                    }
 
                 } catch (IOException e) {
                     break;
@@ -145,10 +155,10 @@ public class TCPBridge {
      * Stops the connection threads.
      */
     private void stopConnection(){
-        if (clientToRemoteThread != null && clientToRemoteThread.getState() == Thread.State.RUNNABLE) {
+        if (clientToRemoteThread != null && clientToRemoteThread.isAlive()) {
             clientToRemoteThread.interrupt();
         }
-        if (remoteToClientThread != null && remoteToClientThread.getState() == Thread.State.RUNNABLE) {
+        if (remoteToClientThread != null && remoteToClientThread.isAlive()) {
             remoteToClientThread.interrupt();
         }
     }
@@ -159,8 +169,7 @@ public class TCPBridge {
     private void restartConnection(){
         Log.logger.warning("Restart connection threads. Local server port : (" +this.getLocalPort()+")");
 
-        stopConnection();
-        startConnection();
+        createConnectionThreads();
     }
 
     /**
@@ -181,18 +190,27 @@ public class TCPBridge {
                     int bytesRead;
                     byte[] buffer = new byte[4096];
 
-                    while (!Thread.currentThread().isInterrupted() && (bytesRead = clientSocket.getInputStream().read(buffer)) != -1) {
-                        Log.logger.finer("Forward content to server. Local server port : (" +this.getLocalPort()+")");
-                        // Create a custom header and attach the message
+                    while (!Thread.currentThread().isInterrupted()) {
 
-                        String message = new String(buffer, 0, bytesRead);
-                        String combinedMessage = header + message;
+                       if((bytesRead = clientSocket.getInputStream().read(buffer)) != -1) {
+                           Log.logger.finer("Forward content to server. Local server port : (" + this.getLocalPort() + ")");
+                           // Create a custom header and attach the message
 
-                        remoteSocket.getOutputStream().write(combinedMessage.getBytes());
+                           String message = new String(buffer, 0, bytesRead);
+                           String combinedMessage = header + message;
+
+                           remoteSocket.getOutputStream().write(combinedMessage.getBytes());
+                           remoteSocket.getOutputStream().flush();
+                       }
                     }
-                } catch (IOException e) {
+                } catch (IOException | IllegalThreadStateException e) {
                     Log.logger.warning("Error occurred at client->server thread: [" + e.getMessage() + " Local server port : (" +this.getLocalPort()+")");
-                    restartConnection();
+
+                    if(!clientSocket.isClosed() && !remoteSocket.isClosed()){
+                        restartConnection();
+                    }
+
+
                 }
             });
 
@@ -201,13 +219,19 @@ public class TCPBridge {
                 try {
                     int bytesRead;
                     byte[] buffer = new byte[4096];
-                    while (!Thread.currentThread().isInterrupted() && (bytesRead = remoteSocket.getInputStream().read(buffer)) != -1) {
-                        Log.logger.finer("Received content from server. Local server port : (" +this.getLocalPort()+")");
-                        clientSocket.getOutputStream().write(buffer, 0, bytesRead);
+                    while (!Thread.currentThread().isInterrupted()) {
+                        if((bytesRead = remoteSocket.getInputStream().read(buffer)) != -1) {
+                            Log.logger.finer("Received content from server. Local server port : (" + this.getLocalPort() + ")");
+                            clientSocket.getOutputStream().write(buffer, 0, bytesRead);
+                            clientSocket.getOutputStream().flush();
+                        }
                     }
-                } catch (IOException e) {
+                } catch (IOException | IllegalThreadStateException e) {
                     Log.logger.warning("Error occurred at server->client thread: [" + e.getMessage() + " Local server port : (" +this.getLocalPort()+")");
-                    restartConnection();
+
+                    if(!clientSocket.isClosed() && !remoteSocket.isClosed()){
+                        restartConnection();
+                    }
 
                 }
             });
