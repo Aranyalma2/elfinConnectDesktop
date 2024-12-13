@@ -135,12 +135,7 @@ public class BridgeCreator {
 
         // Close the active connection
         TCPBridge forRemove = activeBridges.remove(mac);
-        try {
-            forRemove.stopBridge();
-        }catch (RuntimeException runtimeException){
-            Log.logger.warning(runtimeException.getMessage());
-            Log.logger.severe("Abandoned sockets/threads may exists!!!");
-        }
+        forRemove.stopBridge();
 
         //Update port list and refresh table content
         User.getInstance().updatePort(mac, 0);

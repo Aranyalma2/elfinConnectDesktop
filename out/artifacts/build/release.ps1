@@ -14,7 +14,7 @@ if (-not $version) {
 $work_dir = "Elfin Connect Desktop $version"
 $java_folder = Join-Path $work_dir "java"
 $destinationZip = "..\releases\Elfin_Connect_Desktop_$version.zip"
-$download_link = "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2%2B13/OpenJDK21U-jre_x64_windows_hotspot_21.0.2_13.zip"
+$download_link = "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.13%2B11/OpenJDK17U-jre_x86-32_windows_hotspot_17.0.13_11.zip"
 
 
 if (-not (Test-Path -Path $work_dir)) {

@@ -32,7 +32,7 @@ public class Log {
                 }
             }
 
-            logger.setLevel(Level.ALL);
+            logger.setLevel(Level.INFO);
 
             // Add FileHandler to log to last.log file
             FileHandler fileHandler = new FileHandler("last.log", 1000000, 1);

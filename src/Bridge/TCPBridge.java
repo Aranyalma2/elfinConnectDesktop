@@ -64,18 +64,10 @@ public class TCPBridge {
             throw new RuntimeException("Local server create error: " + e.getMessage());
         }
 
-        boolean connectionStatus = false;
+        boolean connectionStatus;
         try{
-            Log.logger.info("Attempt to connect remote server at: (" + SecureSocketBuilder.getHost() + ":" + SecureSocketBuilder.getPort() +")");
-            remoteSocket = SecureSocketBuilder.getNewSocket();
-            remoteSocket.setSoTimeout(5000);
-            remoteSocket.getOutputStream().write(connect.getBytes());
-            Log.logger.info("Sent connection request to remote server at: (" + SecureSocketBuilder.getHost() + ":" + SecureSocketBuilder.getPort() +")");
-
-            connectionStatus = DataFromJson.convertJsonToStatus(readServerResponse(remoteSocket.getInputStream()));
-            remoteSocket.setSoTimeout(1800000);
+            connectionStatus = createRemoteConnection();
         }catch(IOException e){
-
             localServer.close();
             throw new IOException("Unable to connect remote server at: (" + SecureSocketBuilder.getHost() + ":" + SecureSocketBuilder.getPort() +")");
         }
@@ -105,6 +97,12 @@ public class TCPBridge {
                 }
             }
             stopConnection();
+            try {
+                localServer.close();
+                remoteSocket.close();
+            } catch (IOException e) {
+                Log.logger.severe("Unable to close the local/remote sockets Local server port : (" +this.getLocalPort()+")");
+            }
 
         });
         localConnectionHandlerThread.start();
@@ -124,15 +122,28 @@ public class TCPBridge {
      *
      * @throws RuntimeException If there is an issue closing the sockets.
      */
-    public void stopBridge() throws RuntimeException{
-        try {
-            Log.logger.info("Try to stop bridge. Local server port : (" +this.getLocalPort()+")");
-            localServer.close();
-            remoteSocket.close();
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to close the local/remote sockets Local server port : (" +this.getLocalPort()+")");
-        }
-        Log.logger.info("Bridge threads stopped. Local server port : (" +this.getLocalPort()+")");
+    public void stopBridge() {
+        Log.logger.info("Stopping bridge. Local server port : (" +this.getLocalPort()+")");
+        localConnectionHandlerThread.interrupt();
+    }
+
+    /**
+     * Start the remote tcp client socket
+     *
+     * @return - status
+     * @throws IOException If there is an issue to connect
+     */
+    private boolean createRemoteConnection() throws IOException {
+        Log.logger.info("Attempt to connect remote server at: (" + SecureSocketBuilder.getHost() + ":" + SecureSocketBuilder.getPort() +")");
+        remoteSocket = SecureSocketBuilder.getNewSocket();
+        remoteSocket.setSoTimeout(5000);
+        remoteSocket.getOutputStream().write(connect.getBytes());
+        Log.logger.info("Sent connection request to remote server at: (" + SecureSocketBuilder.getHost() + ":" + SecureSocketBuilder.getPort() +")");
+
+        boolean connectionStatus = DataFromJson.convertJsonToStatus(readServerResponse(remoteSocket.getInputStream()));
+        remoteSocket.setSoTimeout(1800000);
+
+        return connectionStatus;
     }
 
     /**
