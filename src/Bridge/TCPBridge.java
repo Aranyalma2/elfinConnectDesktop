@@ -7,9 +7,8 @@ import java.io.*;
 import java.net.Socket;
 import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
-import SW.Log;
 
-import javax.net.ssl.SSLSocket;
+import SW.Log;
 
 /**
  * The TCPBridge class manages the creation and control of a TCP bridge between a local server and a remote server.
@@ -95,17 +94,11 @@ public class TCPBridge {
                 try {
                     clientSocket = localServer.accept();
                     Log.logger.info("Local server: ("+ this.getLocalPort() +") incoming connection!");
+                    //Stop force stop existing connection
+                    stopConnection();
 
-                    try {
-                        System.out.println(clientToRemoteThread.getState());
-                        System.out.println(remoteToClientThread.getState());
-                    }catch (Exception e){}
-
-                    if(clientToRemoteThread == null || remoteToClientThread == null || !clientToRemoteThread.isAlive() || !remoteToClientThread.isAlive()){
-
-                        Log.logger.info("Create new bridge: ("+ this.getLocalPort() +") !");
-                        createConnectionThreads();
-                    }
+                    Log.logger.info("Create new bridge: ("+ this.getLocalPort() +") !");
+                    createConnectionThreads();
 
                 } catch (IOException e) {
                     break;
@@ -115,7 +108,6 @@ public class TCPBridge {
 
         });
         localConnectionHandlerThread.start();
-
     }
 
     /**
@@ -194,19 +186,26 @@ public class TCPBridge {
 
                        if((bytesRead = clientSocket.getInputStream().read(buffer)) != -1) {
                            Log.logger.finer("Forward content to server. Local server port : (" + this.getLocalPort() + ")");
-                           // Create a custom header and attach the message
+                           // Add the custom header to the message
+                           byte[] headerBytes = header.getBytes();
+                           byte[] combinedMessage = new byte[headerBytes.length + bytesRead];
 
-                           String message = new String(buffer, 0, bytesRead);
-                           String combinedMessage = header + message;
+                           System.arraycopy(headerBytes, 0, combinedMessage, 0, headerBytes.length);
+                           System.arraycopy(buffer, 0, combinedMessage, headerBytes.length, bytesRead);
 
-                           remoteSocket.getOutputStream().write(combinedMessage.getBytes());
+                           remoteSocket.getOutputStream().write(combinedMessage);
                            remoteSocket.getOutputStream().flush();
+
+                           Log.logger.finest(new String(buffer, 0, bytesRead));
                        }
                     }
                 } catch (IOException | IllegalThreadStateException e) {
                     Log.logger.warning("Error occurred at client->server thread: [" + e.getMessage() + " Local server port : (" +this.getLocalPort()+")");
 
                     if(!clientSocket.isClosed() && !remoteSocket.isClosed()){
+                        stopConnection();
+                    }
+                    else {
                         restartConnection();
                     }
 
@@ -230,6 +229,9 @@ public class TCPBridge {
                     Log.logger.warning("Error occurred at server->client thread: [" + e.getMessage() + " Local server port : (" +this.getLocalPort()+")");
 
                     if(!clientSocket.isClosed() && !remoteSocket.isClosed()){
+                        stopConnection();
+                    }
+                    else {
                         restartConnection();
                     }
 

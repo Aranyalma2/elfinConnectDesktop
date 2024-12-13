@@ -87,6 +87,6 @@ public class SecureSocketBuilder {
     }
 
     public static Socket getNewSocket() throws IOException {
-        return getNewSocket(false);
+        return getNewSocket(true);
     }
 }
