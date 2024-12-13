@@ -42,7 +42,7 @@ if (-not (Test-Path $java_folder)) {
     Expand-Archive -Path (Join-Path -Path $work_dir -ChildPath java.zip) -DestinationPath $work_dir
 
     # Rename the extracted folder to "java"
-    Rename-Item -Path (Join-Path $work_dir "jdk-21.0.2+13-jre") -NewName "java"
+    Rename-Item -Path (Join-Path $work_dir "jdk-17.0.13+11-jre") -NewName "java"
 
     # Clean up - remove the downloaded zip file
     Remove-Item -Path (Join-Path -Path $work_dir -ChildPath java.zip)
